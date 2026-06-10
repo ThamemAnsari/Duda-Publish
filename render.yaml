@@ -3,7 +3,7 @@ services:
     name: duda-republish
     runtime: node
     # Install browsers into the project directory so they survive container restarts
-    buildCommand: npm install && PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright npx playwright install chromium --with-deps
+    buildCommand: npm install && PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright npx playwright install chromium
     startCommand: npm start
     plan: free
     healthCheckPath: /health
