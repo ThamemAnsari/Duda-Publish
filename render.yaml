@@ -2,20 +2,23 @@ services:
   - type: web
     name: duda-republish
     runtime: node
-    buildCommand: npm install && npx playwright install chromium --with-deps
+    # Install browsers into the project directory so they survive container restarts
+    buildCommand: npm install && PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright npx playwright install chromium --with-deps
     startCommand: npm start
-    plan: starter          # use 'free' if you're okay with sleep after 15min inactivity
+    plan: free
     healthCheckPath: /health
     envVars:
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright
       - key: DUDA_EMAIL
-        sync: false        # set manually in Render dashboard
+        sync: false
       - key: DUDA_PASSWORD
         sync: false
       - key: DUDA_SITE
         value: bc6015ea
       - key: WEBHOOK_TOKEN
-        sync: false        # set manually in Render dashboard
+        sync: false
       - key: DUDA_AUTH_BASE64
-        sync: false        # paste base64 of duda_auth.json here
-      - key: PORT
-        value: 3000
+        sync: false
+      - key: ZOHO_CLIQ_WEBHOOK
+        sync: false
