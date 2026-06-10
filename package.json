@@ -1,4 +1,12 @@
 {
+  "name": "duda-republish",
+  "version": "1.0.0",
+  "description": "Auto-republish Duda site via webhook",
+  "main": "republish_server.js",
+  "scripts": {
+    "start": "node republish_server.js",
+    "dev": "node republish_server.js"
+  },
   "dependencies": {
     "dotenv": "^17.4.2",
     "playwright": "^1.60.0"

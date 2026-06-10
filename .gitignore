@@ -1,1 +1,9 @@
+# Session files — never commit these!
+duda_auth.json
+*.log
+
+# Environment
+.env
+
+# Dependencies
 node_modules/

@@ -3,13 +3,14 @@
  * Duda Auto-Republish Server (Node.js)
  * ============================================================
  * Listens for Zoho Cliq Bot webhook
- * → opens Duda in Chrome → clicks Republish
+ * → opens headless Chromium → clicks Republish
  *
- * Run:
+ * Run locally:
  *   node republish_server.js
  *
- * In another terminal:
- *   npx ngrok http 3000
+ * Deploy on Render:
+ *   Set env vars: DUDA_EMAIL, DUDA_PASSWORD, DUDA_SITE,
+ *                 WEBHOOK_TOKEN, DUDA_AUTH_BASE64
  * ============================================================
  */
 
@@ -20,33 +21,123 @@ const fs           = require('fs');
 const path         = require('path');
 const { chromium } = require('playwright');
 
-// ─── CONFIG ──────────────────────────────────────────────────
-const DUDA_EMAIL    = process.env.DUDA_EMAIL    || 'ansaransuu508@gmail.com';
-const DUDA_PASSWORD = process.env.DUDA_PASSWORD || 'YSc2@#MdzyyQXYX';
-const DUDA_SITE     = process.env.DUDA_SITE     || 'bc6015ea';
-const DUDA_URL      = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
-const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || 'teameverest2026';
-const PORT          = process.env.PORT          || 3000;
-const AUTH_FILE     = path.resolve('duda_auth.json');
+// ─── CRASH GUARD ─────────────────────────────────────────────
+// Keep server alive even if a republish attempt throws
+process.on('unhandledRejection', (reason) => {
+  console.error(`[UNHANDLED REJECTION] ${reason}`);
+  isRepublishing = false;
+});
+process.on('uncaughtException', (err) => {
+  console.error(`[UNCAUGHT EXCEPTION] ${err.message}`);
+  isRepublishing = false;
+});
+
+// ─── CONFIG ─────────────────────────────────────────────
+const DUDA_EMAIL          = process.env.DUDA_EMAIL          || 'ansaransuu508@gmail.com';
+const DUDA_PASSWORD       = process.env.DUDA_PASSWORD       || '';
+const DUDA_SITE           = process.env.DUDA_SITE           || 'bc6015ea';
+const DUDA_URL            = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
+const WEBHOOK_TOKEN       = process.env.WEBHOOK_TOKEN       || 'teameverest2026';
+const PORT                = process.env.PORT                || 3000;
+const AUTH_FILE           = path.resolve('duda_auth.json');
+// Zoho Cliq Incoming Webhook URL — set this in your .env or Render env vars
+// Create one at: Cliq → Integrations → Incoming Webhooks → New Webhook
+const ZOHO_CLIQ_WEBHOOK   = process.env.ZOHO_CLIQ_WEBHOOK  || '';
 
 let isRepublishing  = false;
 
-// ─── LOGGING ─────────────────────────────────────────────────
+// ─── LOGGING ────────────────────────────────────────────
 function log(msg) {
   const ts = new Date().toISOString();
   const line = `[${ts}] ${msg}`;
   console.log(line);
-  fs.appendFileSync('republish.log', line + '\n');
+  try { fs.appendFileSync('republish.log', line + '\n'); } catch (_) {}
+}
+
+// ─── NOTIFY ZOHO CLIQ ──────────────────────────────────────
+function notifyCliq(text) {
+  if (!ZOHO_CLIQ_WEBHOOK) return; // skip if not configured
+  const body = JSON.stringify({ text });
+  const url  = new URL(ZOHO_CLIQ_WEBHOOK);
+  const opts = {
+    hostname: url.hostname,
+    path:     url.pathname + url.search,
+    method:   'POST',
+    headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+  };
+  const req = require('https').request(opts, (res) => {
+    log(`📬 Cliq notified (HTTP ${res.statusCode})`);
+  });
+  req.on('error', (e) => log(`⚠️  Cliq notify failed: ${e.message}`));
+  req.write(body);
+  req.end();
+}
+
+// ─── BOOTSTRAP SESSION FROM ENV VAR ──────────────────────────
+// On Render, the filesystem is ephemeral. We encode duda_auth.json
+// as base64 and store it in DUDA_AUTH_BASE64 env var.
+// On every startup, we decode it back to disk.
+function bootstrapSession() {
+  const b64 = process.env.DUDA_AUTH_BASE64;
+  if (b64 && !fs.existsSync(AUTH_FILE)) {
+    try {
+      const json = Buffer.from(b64, 'base64').toString('utf8');
+      fs.writeFileSync(AUTH_FILE, json);
+      log('✅ Session loaded from DUDA_AUTH_BASE64 env var.');
+    } catch (err) {
+      log(`⚠️  Failed to decode DUDA_AUTH_BASE64: ${err.message}`);
+    }
+  }
+}
+
+// ─── BROWSER LAUNCH OPTIONS ──────────────────────────────────
+// headless: true  — works on Render (no display needed)
+// No channel     — uses Playwright's bundled Chromium (no Chrome install needed)
+function getBrowserOptions() {
+  return {
+    headless: true,
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--window-size=1366,768',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process',
+    ],
+  };
+}
+
+// Real Chrome 124 user agent — avoids headless bot detection
+const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+// Inject JS to hide all common headless fingerprints
+async function stealthify(page) {
+  await page.addInitScript(() => {
+    // Remove webdriver flag
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+    // Fake plugins
+    Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] });
+    // Fake languages
+    Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] });
+    // Fake chrome object
+    window.chrome = { runtime: {} };
+    // Override permissions
+    const originalQuery = window.navigator.permissions?.query;
+    if (originalQuery) {
+      window.navigator.permissions.query = (parameters) =>
+        parameters.name === 'notifications'
+          ? Promise.resolve({ state: Notification.permission })
+          : originalQuery(parameters);
+    }
+  });
 }
 
 // ─── LOGIN & SAVE SESSION ────────────────────────────────────
 async function loginAndSave() {
   log('Opening browser for login...');
-  const browser = await chromium.launch({
-    headless: false,
-    channel: 'chrome',
-    args: ['--disable-blink-features=AutomationControlled'],
-  });
+  const browser = await chromium.launch(getBrowserOptions());
   const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
   const page    = await context.newPage();
 
@@ -62,8 +153,8 @@ async function loginAndSave() {
     } catch (_) {}
   }
 
-  // Wait for manual login (Google SSO) — up to 3 minutes
-  log('Waiting for login... Please sign in manually if needed.');
+  // Wait for login to complete — up to 3 minutes
+  log('Waiting for login...');
   await page.waitForFunction(
     () => window.location.href.includes('/home/') && !window.location.href.includes('/login'),
     { timeout: 180000 }
@@ -73,6 +164,13 @@ async function loginAndSave() {
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
   log(`Session saved to ${AUTH_FILE}`);
+
+  // Print base64 so you can copy it into the Render env var
+  const b64 = Buffer.from(fs.readFileSync(AUTH_FILE, 'utf8')).toString('base64');
+  log('─'.repeat(60));
+  log('Copy the value below into Render → Environment → DUDA_AUTH_BASE64:');
+  console.log('\n' + b64 + '\n');
+  log('─'.repeat(60));
 }
 
 // ─── REPUBLISH DUDA ──────────────────────────────────────────
@@ -85,22 +183,23 @@ async function republishDuda(siteUrl) {
     await loginAndSave();
   }
 
-  const browser = await chromium.launch({
-    headless: false,
-    channel: 'chrome',
-    args: ['--disable-blink-features=AutomationControlled'],
-  });
+  const browser = await chromium.launch(getBrowserOptions());
 
   const context = await browser.newContext({
     viewport:     { width: 1366, height: 768 },
     storageState: AUTH_FILE,
+    userAgent:    CHROME_UA,
+    locale:       'en-US',
+    timezoneId:   'America/New_York',
   });
   const page = await context.newPage();
+  await stealthify(page);
 
   try {
     log('Navigating to Duda editor...');
-    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(3000);
+    // 'load' fires after all resources — reliable for SPAs without hanging forever
+    await page.goto(targetUrl, { waitUntil: 'load', timeout: 60000 });
+    await page.waitForTimeout(5000); // extra buffer for React to render
 
     // Re-login if session expired
     if (page.url().includes('/login')) {
@@ -110,12 +209,28 @@ async function republishDuda(siteUrl) {
       return await republishDuda(siteUrl); // retry
     }
 
-    // Wait for Republish button
+    log(`Page loaded: ${page.url()}`);
+
+    // Dismiss any modal/popup (e.g. "What's New at Duda")
+    log('Dismissing any modals...');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(1000);
+    // Also try clicking a close button if Escape didn't work
+    try {
+      const closeBtn = page.locator('button[aria-label*="close" i], button[aria-label*="dismiss" i], .modal-close, [class*="close"]').first();
+      if (await closeBtn.isVisible({ timeout: 2000 })) {
+        await closeBtn.click();
+        await page.waitForTimeout(500);
+      }
+    } catch (_) {}
+
+    // Wait for Republish button (broader selector, longer timeout)
     log('Waiting for Republish button...');
     await page.waitForSelector(
-      'button:has-text("Republish"), button:has-text("Publish")',
-      { timeout: 30000 }
+      'button:has-text("Republish"), button:has-text("Publish"), [data-testid*="publish"]',
+      { timeout: 45000 }
     );
+
 
     // Click Republish
     const btn = page.locator('button:has-text("Republish"), button:has-text("Publish")').first();
@@ -125,10 +240,19 @@ async function republishDuda(siteUrl) {
     await page.waitForTimeout(3000);
     await browser.close();
     log('✅ Republish complete!');
+    notifyCliq('✅ Duda site republished successfully!');
     return true;
+
 
   } catch (err) {
     log(`❌ Republish failed: ${err.message}`);
+    notifyCliq(`❌ Duda republish failed: ${err.message.split('\n')[0]}`);
+    // Save a screenshot so we can see what the page looked like
+    try {
+      const shot = path.resolve('debug_screenshot.png');
+      await page.screenshot({ path: shot, fullPage: true });
+      log(`📸 Screenshot saved: ${shot}`);
+    } catch (_) {}
     await browser.close();
     return false;
   }
@@ -166,11 +290,11 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Login trigger
+  // Login trigger (local use only — headless login won't work for Google SSO)
   if (req.method === 'GET' && url === '/login') {
     loginAndSave().then(() => log('Login complete'));
     res.writeHead(200);
-    res.end(JSON.stringify({ status: 'login browser opened' }));
+    res.end(JSON.stringify({ status: 'login started — check server logs for DUDA_AUTH_BASE64' }));
     return;
   }
 
@@ -220,6 +344,8 @@ const server = http.createServer((req, res) => {
 });
 
 // ─── START ───────────────────────────────────────────────────
+bootstrapSession(); // Load session from env var if running on Render
+
 server.listen(PORT, () => {
   console.log('='.repeat(55));
   console.log('  Duda Auto-Republish Server (Node.js)');
@@ -229,17 +355,13 @@ server.listen(PORT, () => {
   console.log(`  Webhook   : http://localhost:${PORT}/webhook`);
   console.log(`  Health    : http://localhost:${PORT}/health`);
   console.log(`  Manual    : http://localhost:${PORT}/trigger`);
-  console.log(`  Login     : http://localhost:${PORT}/login`);
   console.log('='.repeat(55));
   console.log();
 
   if (!fs.existsSync(AUTH_FILE)) {
     console.log('⚠️  No saved session found.');
-    console.log(`   Visit http://localhost:${PORT}/login to login first.\n`);
+    console.log(`   Run: node republish_server.js then visit /login\n`);
   } else {
-    console.log('✅  Saved session found. Ready to republish.\n');
+    console.log('✅  Session ready. Ready to republish.\n');
   }
-
-  console.log(`🚀  Now run in another terminal:`);
-  console.log(`    npx ngrok http ${PORT}\n`);
 });
