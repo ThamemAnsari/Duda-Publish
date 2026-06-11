@@ -1,518 +1,8 @@
 {
   "cookies": [
     {
-      "name": "_GRECAPTCHA",
-      "value": "09AKhCRwhXOfTmFzvvkoP0Lq-fqYgmLJ5Q0aA37aMyOwF1Am8bA-L3tweSUFkn1_FFQKRjNopRlpA4qeWbfFQ7gz4",
-      "domain": "www.google.com",
-      "path": "/recaptcha",
-      "expires": 1796546674.431848,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_conv_v",
-      "value": "vi%3A1*sc%3A1*cs%3A1780994630*fs%3A1780994630*pv%3A1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1796762630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_conv_s",
-      "value": "si%3A1*sh%3A1780994630097-0.5267436155599402*pv%3A1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1780995830,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "language",
-      "value": "en",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1786178630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "landingPage",
-      "value": "/login",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1786178630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "deviceView",
-      "value": "desktop",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1781081030,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "first_conversion_source_touchpoints",
-      "value": "direct",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1812530630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "first_conversion_medium_touchpoints",
-      "value": "no_value",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1812530630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "first_conversion_campaign_touchpoints",
-      "value": "no_value",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1812530630,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "isFirstSessionVisit",
-      "value": "false",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1781081030,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "3pkGXVpQJBmoRUe7lFqynnbsogpZG6sj.XvFO0PqnbM-1780994633.225438-1.0.1.1-M3Y2YKmHZSts3kfHcC0CX_HGOGjOEj1wm5PlhXfhGNKb8SvPAbnaMEuzB7BO_ipJwltATUN1_GaxIz3LOYp3scp8cqg9YM1x2HpRVgO0WQrAUHmNQJwJ77P09e.TMTPw",
-      "domain": ".hs-scripts.com",
-      "path": "/",
-      "expires": 1780996432.013272,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__eventn_id_UMzWkTSebj",
-      "value": "1l4v113k26",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1815554632.045844,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "UtEyV8g5.PjrDcILVPL59cqrLLIDKhOm35LUv6QMTCc-1780994633.2918816-1.0.1.1-XZFoIyt0dhN9nQGHe4RS1_88GtBkqBaD56N9khoDoRwCNCVfp.oiZRWTsSdk3GmvIXsRFXrzGbkGIzWB0buCcpoQQ7DLG01qo2VSPgNGmypP_pb86u9VIxuhfL09KH7U",
-      "domain": ".apollo.io",
-      "path": "/",
-      "expires": 1780996432.058284,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "UVeMnh2mE9rc8R7c1Ax6y89wsggIeJw8o.R5CG4Y3fs-1780994633.3185482-1.0.1.1-q4FW4JxNi7.kyzKNB6QpgGGQabGETDv6rfqC3VBkXG38KN7gBAFnl8yActSHh3slGZW4NICxBL.W6a_n5Jl7ugzBaKPWZDEAs9PSMFJE034qrSQlt6iaGUhlp2jcx0xr",
-      "domain": ".hs-analytics.net",
-      "path": "/",
-      "expires": 1780996432.08136,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "k6LIIOJQPLwxJv36ur0etd_Qsa7Ep2o_VUE_9X8eTKQ-1780994633.2977545-1.0.1.1-QegkUWuE3Cfp_y0R6pXw6APwm3dk4ywQAmpiSZYWtlXVXgx40E8OYZTr.vPKOFP7AsEFw_eVI1uf2Fqwbq9AOTzo4JFmRmgn1qn3BpjLMWBsrLuopDTCmo_VvBgjvnVT",
-      "domain": ".hs-banner.com",
-      "path": "/",
-      "expires": 1780996432.088416,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "bg3PPMLfCjgbpFbDNvj1Dc0iusobqE5mnJsGY4KsKyg-1780994633.2917-1.0.1.1-dA4muaDfjFTVAp_jKrm2JeJlfVgcCwcdDx.vRvobYB0IcYpVG7fmCDs9n9CMeJvFGN5nt2L8gN.Q7EaxVrVJLnn_lXq6zvuB8lrrd8dGhUraPPMcqXM3ADenop67rpq5",
-      "domain": ".g2crowd.com",
-      "path": "/",
-      "expires": 1780996432.263589,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "IDE",
-      "value": "AHWqTUnSbtQlBDuqzxuShNjWKgIK2Fc_NypzBtd6wdpval1PrMY7gsMaOy2tEQf2",
-      "domain": ".doubleclick.net",
-      "path": "/",
-      "expires": 1815554632.404624,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_ga",
-      "value": "GA1.1.1400721526.1780994632",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1815554632.459451,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_gd_visitor",
-      "value": "23109637-b0a7-4a40-8812-b746de929652",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1815554632.492693,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_gd_session",
-      "value": "50090fdd-659f-4d15-8b8d-d9712748e5c1",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1781009032,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "6suuid",
-      "value": "0f8cd0176da2000049d2276a12030000a4780b00",
-      "domain": ".6sc.co",
-      "path": "/",
-      "expires": 1815554632.526635,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_gd_svisitor",
-      "value": "0f8cd0176da2000049d2276a12030000a4780b00",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1815554632.556454,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "cebs",
-      "value": "1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Strict"
-    },
-    {
-      "name": "IR_gbd",
-      "value": "duda.co",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "IR_13628",
-      "value": "1780994632587%7C0%7C1780994632587%7C%7C",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_fbp",
-      "value": "fb.1.1780994632651.809252850937639458",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1788770674,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "li_sugr",
-      "value": "99aadb2a-e9fa-4037-96b7-8523178859d4",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1788770634.116871,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "bcookie",
-      "value": "\"v=2&7ba36938-99ec-4f08-85b2-7afb87e78106\"",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1812530634.117028,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "lidc",
-      "value": "\"b=VGST00:s=V:r=V:a=V:p=V:g=3894:u=1:x=1:i=1780994633:t=1781081033:v=2:sig=AQEL2MvEsvXeJgEOP5AXStT15LpD2QtX\"",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1781081032.739125,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_ce.clock_data",
-      "value": "-1240%2C49.206.14.22%2C1%2C90daa551604269dbcdcf237b5cc700f3%2CChrome%2CIN",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1781081032,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Strict"
-    },
-    {
-      "name": "cebsp_",
-      "value": "1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Strict"
-    },
-    {
-      "name": "_uetsid",
-      "value": "57dcdc7063df11f1b4c9b5916e214660",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1781081032,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_uetvid",
-      "value": "57dcf30063df11f1a4902995b9d6968a",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1814690632,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "dicbo_id",
-      "value": "%7B%22dicbo_fetch%22%3A1780994632818%7D",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1780994932,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "slireg",
-      "value": "https://scout.us2.salesloft.com",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1781599432,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "MUID",
-      "value": "1BAC2F712E81698F322038022FC5681C",
-      "domain": ".bing.com",
-      "path": "/",
-      "expires": 1814690633.912565,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "MR",
-      "value": "0",
-      "domain": ".bat.bing.com",
-      "path": "/",
-      "expires": 1781599433.912711,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "b3VXzXEbLqdj.n7v6bFP7vy27Az8agPJEN3Etp7JxSA-1780994633.936922-1.0.1.1-2DGAGEr3_7_oBag7JEwmQFPKIUg48Ak0DMoffcr1_Ns.2bdD3RmJMKTMHRtMs03GrSi2SRLPGD0VjkhHjjJOCBT9l4wU803Chpfy95jBZNakO5EKl3reHOOHpBjHfVj2",
-      "domain": ".g2.com",
-      "path": "/",
-      "expires": 1780996432.927556,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "UserMatchHistory",
-      "value": "AQL-ABrnm-_1hAAAAZ6rjXH2w0VaLBaoWFaQZ8d56JzhmwCRs2QJccFV-K0jTdI4GILo_SwGxk_KCQ",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1783586633.114416,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "AnalyticsSyncHistory",
-      "value": "AQIn8ZU0x4FqswAAAZ6rjXH2KnLgIWCo_hwwRNa5kSJYlNqwU1qjXvj3Ep4cb6lQhr7hyQImf-MOwFRyHOCwag",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1783586633.114489,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "sliguid",
-      "value": "1153d27e-39f7-425c-ab1b-a8e5754813a8",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1812530633,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "slirequested",
-      "value": "true",
-      "domain": "www.duda.co",
-      "path": "/",
-      "expires": 1812530633,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "zCopcgkP6c0557YZF9dOaxR6FbSnBYUhINcS6Yr4zHA-1780994634.3853931-1.0.1.1-KX0xLuQLkebbHmL2oM6Lf_YCsToJF7v9B8fQ8ZNVVD7Q10id_WPXFvGEWjltZt4uPz6bbMkCMc3LJOHdqfcYT9gxCWJ8KGvagPvX911ofuWSCJbslIdmydxiQ_8lo.I2",
-      "domain": ".hsforms.com",
-      "path": "/",
-      "expires": 1780996433.437486,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "bscookie",
-      "value": "\"v=1&202606090843543145fa35-682e-4f31-8abb-fee35fc176a2AQEBWlqYyZGBebXNj8pMtFBXUYeA_E1b\"",
-      "domain": ".www.linkedin.com",
-      "path": "/",
-      "expires": 1812530633.485677,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__hstc",
-      "value": "244318362.73d0eceee216c17573805046e40b13aa.1780994634151.1780994634151.1780994634151.1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1796546634,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "hubspotutk",
-      "value": "73d0eceee216c17573805046e40b13aa",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1796546634,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__hssrc",
-      "value": "1",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__hssc",
-      "value": "244318362.1.1780994634152",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1780996434,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "ShAZ1HkF996OMBd2LCg.hMZ3BXldMeHLbd3S9cJFIP0-1780994635.418109-1.0.1.1-5oktIpHCVRDX.8yGi7IyRKrBIYTta4TIEzSD0B7SmpZoP2DtcCxfHuB8kTtHjPqZBgfFrD7FNaLWSuROgEWw1DS2oVkqbsDmweL_kGbk_lNRi.YpYT959hW6lDbgMkmr",
-      "domain": ".linkedin.com",
-      "path": "/",
-      "expires": 1780996434.462845,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "__cf_bm",
-      "value": "zuPZhMTkXCKQZct5VMUXZc3gYs_jGEiGM0pluMfNdXM-1780994635.4321024-1.0.1.1-eDe_ugl9C6YFcPfmi0gvfqmM.aDKNQG1_6LQbyBYmVN4_wgacF1aTGiYf9HyL2uLc_bMNoTwX9eGxuzFYB9.czUGcXxO9bYUKfXsql9ttPr.eHfMqKq0rDvhzR3JjeGX",
-      "domain": ".hubspot.com",
-      "path": "/",
-      "expires": 1780996434.4913,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "_gcl_au",
-      "value": "1.1.2026236875.1780994632.714590267.1780994674.1780994673",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1788770632,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
-    },
-    {
       "name": "JSESSIONID",
-      "value": "BEA0DA6B8482ED8D67B136F28E3F7CFC",
+      "value": "9F18A00F44D176AB7C414AAC8E00E18F",
       "domain": "my.duda.co",
       "path": "/",
       "expires": -1,
@@ -522,10 +12,10 @@
     },
     {
       "name": "_dm_remember_me",
-      "value": "VTZ6aWQ1SkM5MlQlMkJRRHVVZm9IVU1RJTNEJTNEOklXN2ZkU1BKQzd5bE90SFAlMkJQQWlTUSUzRCUzRA",
+      "value": "eE01NWhZd1lHWVhRbjZoTW9DRUVTdyUzRCUzRDpCZEZXcVpESjhPbmt5QjhqSlhaNkFnJTNEJTNE",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1783586675.317807,
+      "expires": 1783752070.522555,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
@@ -535,14 +25,14 @@
       "value": "dab2a87ecb26446d9bd76ce0648c1711",
       "domain": "my.duda.co",
       "path": "/",
-      "expires": 1783586675.317835,
+      "expires": 1783752070.522574,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_dm_account",
-      "value": "%7B%22name%22%3A%22ansaransuu508%40gmail.com%22%2C%22uuid%22%3A%22dab2a87ecb26446d9bd76ce0648c1711%22%2C%22gaType%22%3A%22RESELLER%22%2C%22lastLogin%22%3A1780994518000%7D",
+      "value": "%7B%22name%22%3A%22ansaransuu508%40gmail.com%22%2C%22uuid%22%3A%22dab2a87ecb26446d9bd76ce0648c1711%22%2C%22gaType%22%3A%22RESELLER%22%2C%22lastLogin%22%3A1781159315000%7D",
       "domain": ".duda.co",
       "path": "/",
       "expires": -1,
@@ -555,179 +45,51 @@
       "value": "rP0D+jqAC3i6ZLyEVai9Mni9GVhTpLR0V7XoRNzWwti4ozbZmsPI5A==",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1783586675.317893,
+      "expires": 1783752070.522611,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
-    },
-    {
-      "name": "_ce.s",
-      "value": "v~9c47f669152f15d33e5f706820341f0a3cc41aad~vir~new~lva~1780994632596~vpv~0~v11.cs~268877~v11.s~57d80df0-63df-11f1-b5a5-b9c4daf5e146~v11.vs~9c47f669152f15d33e5f706820341f0a3cc41aad~v11.sla~1780994632788~v11.ws~1~v11.wr~6~v11ls~57d80df0-63df-11f1-b5a5-b9c4daf5e146~vdva~1781049599999~gtrk.la~mq6e8tgz~v11e~1~v11nv~0~lcw~1780994679842",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": 1812530679,
-      "httpOnly": false,
-      "secure": false,
-      "sameSite": "Strict"
     },
     {
       "name": "_dm_se_token_me",
-      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6ImRhYjJhODdlY2IyNjQ0NmQ5YmQ3NmNlMDY0OGMxNzExIiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MDk5NDY4MTc3NCwiZXhwIjoxNzgwOTk3MDgxfQ.woplx9VHEIw-Y0AwpIeGdUBMXEMy_Lkgz8iUaYaEz4U",
+      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6ImRhYjJhODdlY2IyNjQ0NmQ5YmQ3NmNlMDY0OGMxNzExIiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTE2MDA3NTIxMiwiZXhwIjoxNzgxMTYyNDc1fQ.ShR8hbEAu8-FwEZk8xzeOwHu_N1fEp30GAw28Bw8u6A",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1780997080.604823,
+      "expires": 1781162475.432154,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
-      "name": "AWSALB",
-      "value": "lmh++OIgcoZ79KryFnMTi/GZeJ6HEOTPT9gTJqgiC2qcKYoBuFi+a1qewMpim6fvLQ+ksON8dLfJJN9bkUrQZoMMVpmSFTSNSEXonRJDuqyz0ZwBKz7zZslrGrIy",
-      "domain": "my.duda.co",
+      "name": "AWSALBCORS",
+      "value": "gGPeteN3kppuIJa2A5zTt19qF5M6gHm4BwCsu+FA8sEMxDuKh9kid7PZmHRE7D+d6PWYQa3kBcYTDzZ7F6odt3j590ozOpsGYyQgQT77yJO6SiJrggGc8nrQ2db4",
+      "domain": "widget-mediator.zopim.com",
       "path": "/",
-      "expires": 1781599481.081333,
+      "expires": 1781764880.384358,
       "httpOnly": false,
-      "secure": false,
-      "sameSite": "Lax"
+      "secure": true,
+      "sameSite": "None"
     },
     {
-      "name": "_ga_GFZCS4CS4Q",
-      "value": "GS2.1.s1780994632$o1$g0$t1780994682$j10$l0$h0",
-      "domain": ".duda.co",
+      "name": "AWSALBCORS",
+      "value": "w9+3uKxxWMdIEUQ44knzQ7mW/hJZc7mUBzdgDYeIiFchxgmMssWr77G5pnrAWCBpZvtYpA1vv60aBfkcugA7jNaaEM+ksN84Oph+TG/+dQkxJkGyvi9T9jGg66Gt",
+      "domain": "ws.push-notifs.com",
       "path": "/",
-      "expires": 1815554682.119965,
+      "expires": 1781764881.964285,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "AWSALB",
+      "value": "mOhGqJDMivIGIVcA3ZHslx9bd0uJO3YFetPPJUvML/5sjaW7bCdPstzqYqu7IDBYZYSgevC/Va3ZcXEiaxcCrWF5oSHRfIOE86ukesaMBbYNU6k7+kPVPuToRX/S",
+      "domain": "my.duda.co",
+      "path": "/",
+      "expires": 1781764889.765204,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
     }
   ],
-  "origins": [
-    {
-      "origin": "https://www.duda.co",
-      "localStorage": [
-        {
-          "name": "ce_csp_transport_check",
-          "value": "1781081032665|worker"
-        },
-        {
-          "name": "usermaven_offline_queue_default_data",
-          "value": "{\"queue\":\"[{\\\"payload\\\":{\\\"event_id\\\":\\\"6w096u5v0n\\\",\\\"user\\\":{\\\"anonymous_id\\\":\\\"1l4v113k26\\\",\\\"id\\\":\\\"dab2a87ecb26446d9bd76ce0648c1711\\\",\\\"email\\\":\\\"ansaransuu508@gmail.com\\\"},\\\"company\\\":{},\\\"ids\\\":{\\\"fbp\\\":\\\"fb.1.1780994632651.809252850937639458\\\"},\\\"utc_time\\\":\\\"2026-06-09T08:44:42.123Z\\\",\\\"local_tz_offset\\\":-330,\\\"api_key\\\":\\\"UMzWkTSebj\\\",\\\"src\\\":\\\"usermaven\\\",\\\"event_type\\\":\\\"$scroll\\\",\\\"namespace\\\":\\\"default\\\",\\\"event_attributes\\\":{\\\"percent\\\":100,\\\"window_height\\\":768,\\\"document_height\\\":802,\\\"scroll_distance\\\":34},\\\"referer\\\":\\\"\\\",\\\"url\\\":\\\"https://www.duda.co/login?redirectTo=/home/site/bc6015ea/home\\\",\\\"page_title\\\":\\\"Log In to Duda Platform ┃ Sign In to the Duda Website Builder\\\",\\\"doc_path\\\":\\\"/login\\\",\\\"doc_host\\\":\\\"www.duda.co\\\",\\\"doc_search\\\":\\\"?redirectTo=/home/site/bc6015ea/home\\\",\\\"screen_resolution\\\":\\\"1366x768\\\",\\\"vp_size\\\":\\\"1366x768\\\",\\\"user_agent\\\":\\\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36\\\",\\\"user_language\\\":\\\"en-US\\\",\\\"doc_encoding\\\":\\\"UTF-8\\\",\\\"utm\\\":{}},\\\"retries\\\":0,\\\"timestamp\\\":1780994682123},{\\\"payload\\\":{\\\"event_id\\\":\\\"656e6n0o20\\\",\\\"user\\\":{\\\"anonymous_id\\\":\\\"1l4v113k26\\\",\\\"id\\\":\\\"dab2a87ecb26446d9bd76ce0648c1711\\\",\\\"email\\\":\\\"ansaransuu508@gmail.com\\\"},\\\"company\\\":{},\\\"ids\\\":{\\\"fbp\\\":\\\"fb.1.1780994632651.809252850937639458\\\"},\\\"utc_time\\\":\\\"2026-06-09T08:44:42.123Z\\\",\\\"local_tz_offset\\\":-330,\\\"api_key\\\":\\\"UMzWkTSebj\\\",\\\"src\\\":\\\"usermaven\\\",\\\"event_type\\\":\\\"$pageleave\\\",\\\"namespace\\\":\\\"default\\\",\\\"event_attributes\\\":{\\\"url\\\":\\\"https://www.duda.co/login?redirectTo=/home/site/bc6015ea/home\\\",\\\"referrer\\\":\\\"\\\",\\\"title\\\":\\\"Log In to Duda Platform ┃ Sign In to the Duda Website Builder\\\"},\\\"referer\\\":\\\"\\\",\\\"url\\\":\\\"https://www.duda.co/login?redirectTo=/home/site/bc6015ea/home\\\",\\\"page_title\\\":\\\"Log In to Duda Platform ┃ Sign In to the Duda Website Builder\\\",\\\"doc_path\\\":\\\"/login\\\",\\\"doc_host\\\":\\\"www.duda.co\\\",\\\"doc_search\\\":\\\"?redirectTo=/home/site/bc6015ea/home\\\",\\\"screen_resolution\\\":\\\"1366x768\\\",\\\"vp_size\\\":\\\"1366x768\\\",\\\"user_agent\\\":\\\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36\\\",\\\"user_language\\\":\\\"en-US\\\",\\\"doc_encoding\\\":\\\"UTF-8\\\",\\\"utm\\\":{}},\\\"retries\\\":0,\\\"timestamp\\\":1780994682123}]\"}"
-        },
-        {
-          "name": "_uetvid_exp",
-          "value": "Sun, 04 Jul 2027 08:43:52 GMT"
-        },
-        {
-          "name": "usermaven_default_UMzWkTSebj_data",
-          "value": "{\"userId\":\"dab2a87ecb26446d9bd76ce0648c1711\",\"userProps\":{\"id\":\"dab2a87ecb26446d9bd76ce0648c1711\",\"email\":\"ansaransuu508@gmail.com\"}}"
-        },
-        {
-          "name": "audioeye_reader_settings",
-          "value": "{\"value\":\"{\\\"c_big\\\":0,\\\"rg\\\":0,\\\"memph\\\":0,\\\"contrast_setting\\\":0,\\\"colorshift_setting\\\":0,\\\"text_size_setting\\\":0,\\\"space_setting\\\":0,\\\"font_setting\\\":0,\\\"k\\\":0,\\\"k_disable_default\\\":0,\\\"hlt\\\":0,\\\"disable_animations\\\":0,\\\"display_alt_desc\\\":0}\",\"expiration\":1781570634474}"
-        },
-        {
-          "name": "_gcl_ls",
-          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1780994631896},\"expires\":1788770631896}}"
-        },
-        {
-          "name": "_grecaptcha",
-          "value": "09AKhCRwjsd7pYXgpyi4U9r0dvTjykrmp7zkDOj7t4pqsz-VyRNrj94M8fM3IaufnhBecvBp0KmNoWF14KBumEH9MSbvGn-ekNJxSv_Y84eNn3810DrG8IqS2tA340dZO3"
-        },
-        {
-          "name": "_uetsid",
-          "value": "57dcdc7063df11f1b4c9b5916e214660"
-        },
-        {
-          "name": "66312d0a6c76ae01c7e472d7_canTrack",
-          "value": "{\"data\":false,\"expireTime\":1781081032726}"
-        },
-        {
-          "name": "b60c7446-7365-4c21-9f72-d44fe7e1479f_salespeak-widget-user-id",
-          "value": "02f3abbc-e367-414f-a6bf-630a4b8c184d"
-        },
-        {
-          "name": "v11.fsvd",
-          "value": "{\"notModifiedUrl\":\"https://www.duda.co/login?redirectTo=/home/site/bc6015ea/home\",\"url\":\"duda.co/login\",\"ref\":\"\",\"utm\":[]}"
-        },
-        {
-          "name": "ce_bot_detector",
-          "value": "{\"visits\":0,\"clicks\":1,\"firstVisitTime\":1780994673852,\"detected\":false}"
-        },
-        {
-          "name": "lastExternalReferrerTime",
-          "value": "1780994632624"
-        },
-        {
-          "name": "audioeye_at_start_message",
-          "value": "{\"value\":true}"
-        },
-        {
-          "name": "ce_fvd",
-          "value": "{\"landingUrl\":\"https://www.duda.co/login?redirectTo=/home/site/bc6015ea/home\",\"referrer\":\"\",\"time\":1780994632598,\"utm\":[],\"dailyVisitTime\":1780994632599,\"userData\":[]}"
-        },
-        {
-          "name": "_uetsid_exp",
-          "value": "Wed, 10 Jun 2026 08:43:52 GMT"
-        },
-        {
-          "name": "_uetvid",
-          "value": "57dcf30063df11f1a4902995b9d6968a"
-        },
-        {
-          "name": "g2tracking",
-          "value": "{\"20260509\":[\"1400721526.1780994632,Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/148.0.0.0Safari/537.36,1366x768,en-US,-330,1243,,\",\",Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/148.0.0.0Safari/537.36,1366x768,en-US,-330,1243,,\"]}"
-        },
-        {
-          "name": "deviceId",
-          "value": "0a207786c1685503c1a96359b057dc65"
-        },
-        {
-          "name": "66312d0a6c76ae01c7e472d7_eventQueue",
-          "value": "[]"
-        },
-        {
-          "name": "lastExternalReferrer",
-          "value": "empty"
-        },
-        {
-          "name": "apolloAnonId",
-          "value": "464c31b0-4a39-42df-b687-fc1bd6523f5d"
-        },
-        {
-          "name": "_6senseCompanyDetails",
-          "value": "{\"company\":{\"domain\":\"jesuittechnologies.in\",\"name\":\"JESUIT TECHNOLOGIES PRIVATE LIMITED\",\"region\":\"Southern Asia\",\"country\":\"India\",\"state\":\"Tamil Nadu\",\"city\":\"Chennai\",\"industry\":\"Software and Technology\",\"companyId\":\"0efa7b1b704f58a\",\"country_iso_code\":\"IN\",\"address\":\"no.24 old no.17 xi avenue\",\"zip\":\"600083\",\"phone\":\"+91 90030 25867\",\"employee_range\":\"20 - 49\",\"revenue_range\":\"$1M - $5M\",\"employee_count\":\"40\",\"annual_revenue\":\"1370487\",\"is_blacklisted\":false,\"state_code\":\"25\",\"is_6qa\":false,\"geoIP_country\":\"India\",\"geoIP_state\":\"Tamil Nadu\",\"geoIP_city\":\"Tambaram\",\"company_match\":\"Match\",\"additional_comment\":\"Company name or domain match was found\",\"sic\":\"5045\",\"sic_description\":\"Computers and Computer Peripheral Equipment and Software\",\"naics\":\"42343\",\"industry_v2\":[{\"industry\":\"Software\",\"subindustry\":\"\"},{\"industry\":\"Wholesale & Distribution\",\"subindustry\":\"\"},{\"industry\":\"Information Technology\",\"subindustry\":\"\"}],\"naics_description\":\"Computer and Computer Peripheral Equipment and Software Merchant Wholesalers\"},\"scores\":[],\"segments\":{\"ids\":[],\"names\":[],\"list\":[]},\"confidence\":\"Moderate\"}"
-        },
-        {
-          "name": "li_adsId",
-          "value": "ac6bbc53-e812-4705-8425-83a6b3ec9707"
-        },
-        {
-          "name": "numberOfVisits",
-          "value": "1"
-        }
-      ]
-    },
-    {
-      "origin": "https://www.google.com",
-      "localStorage": [
-        {
-          "name": "rc::a",
-          "value": "cjQ0MjExYW5hN253"
-        },
-        {
-          "name": "rc::f",
-          "value": "0aAJh6VkoV2obBcC1_q-3YttHEm3ZDmDazoM_ii36ToNP9H8Z72stgZll2v-Ht5det_MbKQOo"
-        }
-      ]
-    },
-    {
-      "origin": "https://brain.salespeak.ai",
-      "localStorage": [
-        {
-          "name": "b60c7446-7365-4c21-9f72-d44fe7e1479f_salespeak-widget-user-id",
-          "value": "f2d76a5f-f14c-4643-9f65-87c029dae7a7"
-        }
-      ]
-    }
-  ]
+  "origins": []
 }

@@ -88,7 +88,7 @@ function notifyCallback(success, message) {
 
 // ─── LOAD SESSION FROM ENV ────────────────────────────────────
 function loadSession() {
-  if (DUDA_AUTH_BASE64 && !fs.existsSync(AUTH_FILE)) {
+  if (DUDA_AUTH_BASE64) {
     try {
       fs.writeFileSync(AUTH_FILE, Buffer.from(DUDA_AUTH_BASE64, 'base64').toString('utf8'));
       log('✅ Session loaded from DUDA_AUTH_BASE64');
@@ -139,7 +139,7 @@ async function loginAndSave() {
   const page = await context.newPage();
   await stealthify(page);
 
-  await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.goto('https://my.duda.co/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   if (DUDA_PASSWORD) {
     try {
@@ -155,12 +155,35 @@ async function loginAndSave() {
 
   log('Waiting for login redirect...');
   await page.waitForFunction(
-    () => window.location.href.includes('/home/') && !window.location.href.includes('/login'),
+    () => window.location.href.includes('/home') && !window.location.href.includes('/login'),
     { timeout: 180000 }
   );
 
+  try {
+    log(`🔗 Navigating to site URL: ${SITE_URL}`);
+    await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2000);
+  } catch (err) {
+    log(`⚠️ Warning: Navigation to site URL failed: ${err.message}`);
+  }
+
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
+
+  // Prune the auth file to fit inside GitHub Secrets size limit (10 KB)
+  try {
+    const rawState = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+    const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
+    const cleanCookies = rawState.cookies.filter(
+      c => c.name.startsWith('_dm_') || essentialNames.includes(c.name)
+    );
+    const prunedState = { cookies: cleanCookies, origins: [] };
+    fs.writeFileSync(AUTH_FILE, JSON.stringify(prunedState, null, 2));
+    log('🧹 Session file pruned successfully.');
+  } catch (err) {
+    log(`⚠️ Warning: Failed to prune session file: ${err.message}`);
+  }
+
   log('✅ Session saved');
 }
 
