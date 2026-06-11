@@ -1,0 +1,78 @@
+name: Duda Republish
+
+on:
+  # Triggered by IATC-App EC2 via GitHub API
+  repository_dispatch:
+    types: [duda-republish]
+
+  # Manual trigger from GitHub UI (for testing)
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: 'Duda site URL (leave blank for default)'
+        required: false
+        default: ''
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # 1. Checkout Duda-Publish repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 3. Install Node dependencies (playwright)
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Install Playwright Chromium + all system dependencies
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      # 5. Start Xvfb virtual display
+      #    headless: false needs a real display — Xvfb fakes one
+      #    This bypasses most of Duda's bot detection
+      - name: Start Xvfb virtual display
+        run: |
+          sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1366x768x24 -ac &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+          sleep 2
+          echo "✅ Xvfb started on display :99"
+
+      # 6. Run republish script
+      - name: Run Duda Republish
+        env:
+          DISPLAY:           :99
+          DUDA_EMAIL:        ${{ secrets.DUDA_EMAIL }}
+          DUDA_PASSWORD:     ${{ secrets.DUDA_PASSWORD }}
+          DUDA_AUTH_BASE64:  ${{ secrets.DUDA_AUTH_BASE64 }}
+          DUDA_SITE:         ${{ secrets.DUDA_SITE }}
+          ZOHO_CLIQ_WEBHOOK: ${{ secrets.ZOHO_CLIQ_WEBHOOK }}
+          CALLBACK_URL:      ${{ secrets.CALLBACK_URL }}
+          # Site URL: from webhook payload OR manual input
+          DUDA_SITE_URL: ${{ github.event.client_payload.site_url || github.event.inputs.site_url || '' }}
+        run: node republish.js
+
+      # 7. Upload screenshots — always, even on failure
+      #    View them in: Actions tab → click the run → Artifacts section
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: duda-screenshots-${{ github.run_number }}
+          path: |
+            duda_after_load.png
+            duda_before_click.png
+            duda_after_publish.png
+            duda_error.png
+          if-no-files-found: ignore
+          retention-days: 7
