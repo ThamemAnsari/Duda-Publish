@@ -2,7 +2,7 @@
   "cookies": [
     {
       "name": "JSESSIONID",
-      "value": "9F18A00F44D176AB7C414AAC8E00E18F",
+      "value": "743AB9DABFE52B722C93C714BA9848FB",
       "domain": "my.duda.co",
       "path": "/",
       "expires": -1,
@@ -12,10 +12,10 @@
     },
     {
       "name": "_dm_remember_me",
-      "value": "eE01NWhZd1lHWVhRbjZoTW9DRUVTdyUzRCUzRDpCZEZXcVpESjhPbmt5QjhqSlhaNkFnJTNEJTNE",
+      "value": "b2p1SHFHbGVHcWpDS2RRJTJCQm9LMWlBJTNEJTNEOlF2Qlc5UkFRJTJGQWVKb2N2bUJtandVQSUzRCUzRA",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1783752070.522555,
+      "expires": 1783753121.532883,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
@@ -25,7 +25,7 @@
       "value": "dab2a87ecb26446d9bd76ce0648c1711",
       "domain": "my.duda.co",
       "path": "/",
-      "expires": 1783752070.522574,
+      "expires": 1783753121.532953,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
@@ -45,47 +45,47 @@
       "value": "rP0D+jqAC3i6ZLyEVai9Mni9GVhTpLR0V7XoRNzWwti4ozbZmsPI5A==",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1783752070.522611,
+      "expires": 1783753121.53306,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_dm_se_token_me",
-      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6ImRhYjJhODdlY2IyNjQ0NmQ5YmQ3NmNlMDY0OGMxNzExIiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTE2MDA3NTIxMiwiZXhwIjoxNzgxMTYyNDc1fQ.ShR8hbEAu8-FwEZk8xzeOwHu_N1fEp30GAw28Bw8u6A",
+      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6ImRhYjJhODdlY2IyNjQ0NmQ5YmQ3NmNlMDY0OGMxNzExIiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTE2MTEyNjI3MCwiZXhwIjoxNzgxMTYzNTI2fQ.xn4WJlVhHeX_BVho1aNqbKl3CNBM-AQ9vOmyTVx5zyU",
       "domain": ".my.duda.co",
       "path": "/",
-      "expires": 1781162475.432154,
+      "expires": 1781163526.771649,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "AWSALBCORS",
-      "value": "gGPeteN3kppuIJa2A5zTt19qF5M6gHm4BwCsu+FA8sEMxDuKh9kid7PZmHRE7D+d6PWYQa3kBcYTDzZ7F6odt3j590ozOpsGYyQgQT77yJO6SiJrggGc8nrQ2db4",
-      "domain": "widget-mediator.zopim.com",
+      "value": "LEHSB0NWwvzkV9lw0ADB2G6dRC0IEbMZqKp6bcFzT7mnEBehx1CLPqqHpOOnms7LSyxuSipSBZge12K/xfhKL2M+hFqYtSgEZRqmx9jk7JKM6C1h1UwkbDKA+jKG",
+      "domain": "ws.push-notifs.com",
       "path": "/",
-      "expires": 1781764880.384358,
+      "expires": 1781765932.642824,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "AWSALBCORS",
-      "value": "w9+3uKxxWMdIEUQ44knzQ7mW/hJZc7mUBzdgDYeIiFchxgmMssWr77G5pnrAWCBpZvtYpA1vv60aBfkcugA7jNaaEM+ksN84Oph+TG/+dQkxJkGyvi9T9jGg66Gt",
-      "domain": "ws.push-notifs.com",
+      "value": "zTMosPBqpyiJcnKDrGga0bmeZK9kV2/El7KEvdnmr2lTE54MRB98CMlk2SPLIrwDtVeURKcHVOb0KpCy0MlnyXgONHLnHKqZZ+i1ji7Gq8nS2PCMp79qxZcyG1rF",
+      "domain": "widget-mediator.zopim.com",
       "path": "/",
-      "expires": 1781764881.964285,
+      "expires": 1781765946.34859,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "AWSALB",
-      "value": "mOhGqJDMivIGIVcA3ZHslx9bd0uJO3YFetPPJUvML/5sjaW7bCdPstzqYqu7IDBYZYSgevC/Va3ZcXEiaxcCrWF5oSHRfIOE86ukesaMBbYNU6k7+kPVPuToRX/S",
+      "value": "TaWn6oSfnikUl65YHzS1eI65rlkl+xPKO+NdAI7VV2KbUYP9t0BDnE1DjSCDzDwJV7oDGgzMKxC0T6dz9siWpbhikfN9PPlzaz0hQknun2UL499IE02hd7F/1IKA",
       "domain": "my.duda.co",
       "path": "/",
-      "expires": 1781764889.765204,
+      "expires": 1781765947.308951,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"

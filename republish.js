@@ -20,6 +20,7 @@ const DUDA_PASSWORD     = process.env.DUDA_PASSWORD     || '';
 const DUDA_SITE         = process.env.DUDA_SITE         || 'bc6015ea';
 const DUDA_AUTH_BASE64  = process.env.DUDA_AUTH_BASE64  || '';
 const ZOHO_CLIQ_WEBHOOK = process.env.ZOHO_CLIQ_WEBHOOK || '';
+const ZOHO_CLIQ_MESSAGE_ID = process.env.ZOHO_CLIQ_MESSAGE_ID || '';
 const CALLBACK_URL      = process.env.CALLBACK_URL      || '';
 
 // Site URL: CLI arg → env var → default
@@ -39,7 +40,11 @@ function log(msg) {
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
 function notifyCliq(text) {
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
-  const body = JSON.stringify({ text });
+  const payload = { text };
+  if (ZOHO_CLIQ_MESSAGE_ID) {
+    payload.parent_id = ZOHO_CLIQ_MESSAGE_ID;
+  }
+  const body = JSON.stringify(payload);
   const url  = new URL(ZOHO_CLIQ_WEBHOOK);
   const opts = {
     hostname: url.hostname,

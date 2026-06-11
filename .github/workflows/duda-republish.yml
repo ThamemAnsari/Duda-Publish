@@ -60,6 +60,7 @@ jobs:
           DUDA_AUTH_BASE64:  ${{ secrets.DUDA_AUTH_BASE64 }}
           DUDA_SITE:         ${{ secrets.DUDA_SITE }}
           ZOHO_CLIQ_WEBHOOK: ${{ secrets.ZOHO_CLIQ_WEBHOOK }}
+          ZOHO_CLIQ_MESSAGE_ID: ${{ github.event.client_payload.message_id || '' }}
           CALLBACK_URL:      ${{ secrets.CALLBACK_URL }}
           # Site URL: from webhook payload OR manual input
           DUDA_SITE_URL: ${{ github.event.client_payload.site_url || github.event.inputs.site_url || '' }}
