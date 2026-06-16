@@ -20,7 +20,7 @@ const DUDA_PASSWORD      = process.env.DUDA_PASSWORD      || '';
 const DUDA_SITE          = process.env.DUDA_SITE          || '3f4c882c';
 const DUDA_AUTH_BASE64   = process.env.DUDA_AUTH_BASE64   || '';
 const ZOHO_CLIQ_WEBHOOK  = process.env.ZOHO_CLIQ_WEBHOOK  || '';
-const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'P2099672000022436012';
+const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'O2099672000000008001';
 const CALLBACK_URL       = process.env.CALLBACK_URL       || '';
 
 // ✅ Decode message ID — Zoho sometimes sends spaces instead of underscores

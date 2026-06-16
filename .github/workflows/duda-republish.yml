@@ -63,7 +63,7 @@ jobs:
           ZOHO_CLIENT_ID:        ${{ secrets.ZOHO_CLIENT_ID }}        # ✅ added
           ZOHO_CLIENT_SECRET:    ${{ secrets.ZOHO_CLIENT_SECRET }}    # ✅ added
           ZOHO_REFRESH_TOKEN:    ${{ secrets.ZOHO_REFRESH_TOKEN }}    # ✅ added
-          ZOHO_CLIQ_CHANNEL_ID:  P2099672000022436012                 # ✅ added (hardcoded)
+          ZOHO_CLIQ_CHANNEL_ID:  O2099672000000008001                 # ✅ added (hardcoded)
           ZOHO_CLIQ_MESSAGE_ID:  ${{ github.event.client_payload.message_id || '' }}
           CALLBACK_URL:          ${{ secrets.CALLBACK_URL }}
           # Site URL: from webhook payload OR manual input
