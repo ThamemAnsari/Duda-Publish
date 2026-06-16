@@ -111,12 +111,17 @@ async function notifyCliq(text, messageId) {
   const accessToken = await getZohoAccessToken();
   if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
     const payload = { text };
-    if (threadId) payload.thread_message_id = threadId;
+
+    // ✅ Cliq v3: thread replies go to /threads/{threadId}/messages endpoint
+    // Passing thread_message_id in the body causes HTTP 400 "Incorrect values submitted"
+    const apiPath = threadId
+      ? `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/threads/${threadId}/messages`
+      : `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`;
 
     const body = JSON.stringify(payload);
     const opts = {
       hostname: 'cliq.zoho.com',
-      path:     `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`,
+      path:     apiPath,
       method:   'POST',
       headers:  {
         'Authorization':  `Zoho-oauthtoken ${accessToken}`,
