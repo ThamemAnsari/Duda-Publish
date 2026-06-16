@@ -9,19 +9,25 @@
  * ============================================================
  */
 
-const fs   = require('fs');
-const path = require('path');
+const fs    = require('fs');
+const path  = require('path');
 const https = require('https');
 const { chromium } = require('playwright');
 
 // ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
-const DUDA_EMAIL           = process.env.DUDA_EMAIL           || '';
-const DUDA_PASSWORD        = process.env.DUDA_PASSWORD        || '';
-const DUDA_SITE            = process.env.DUDA_SITE            || 'bc6015ea';
-const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
-const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
-const ZOHO_CLIQ_MESSAGE_ID = process.env.ZOHO_CLIQ_MESSAGE_ID || ''; // ✅ from client_payload
-const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
+const DUDA_EMAIL                  = process.env.DUDA_EMAIL                  || '';
+const DUDA_PASSWORD               = process.env.DUDA_PASSWORD               || '';
+const DUDA_SITE                   = process.env.DUDA_SITE                   || 'bc6015ea';
+const DUDA_AUTH_BASE64            = process.env.DUDA_AUTH_BASE64            || '';
+const ZOHO_CLIQ_WEBHOOK           = process.env.ZOHO_CLIQ_WEBHOOK           || ''; // fallback webhook
+const ZOHO_CLIQ_CHANNEL_ID        = process.env.ZOHO_CLIQ_CHANNEL_ID        || 'P2099672000022436012';
+const ZOHO_CLIQ_MESSAGE_ID        = process.env.ZOHO_CLIQ_MESSAGE_ID        || ''; // from client_payload
+const CALLBACK_URL                = process.env.CALLBACK_URL                || '';
+
+// ✅ OAuth refresh token secrets (stored permanently in GitHub Secrets)
+const ZOHO_CLIENT_ID              = process.env.ZOHO_CLIENT_ID              || '';
+const ZOHO_CLIENT_SECRET          = process.env.ZOHO_CLIENT_SECRET          || '';
+const ZOHO_REFRESH_TOKEN          = process.env.ZOHO_REFRESH_TOKEN          || '';
 
 // Site URL: CLI arg → env var → default
 const SITE_URL = process.argv[2]
@@ -37,18 +43,111 @@ function log(msg) {
   console.log(`[DUDA] [${ts}] ${msg}`);
 }
 
-// ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
-function notifyCliq(text, messageId) {
-  if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
-
-  const payload = { text };
-
-  // ✅ FIX: use the passed messageId (falls back to env var)
-  const threadId = messageId || ZOHO_CLIQ_MESSAGE_ID;
-  if (threadId) {
-    payload.parent_id = threadId;
+// ─── GET FRESH ZOHO ACCESS TOKEN ─────────────────────────────
+// Exchanges the stored refresh token for a new access token at runtime.
+// The refresh token never expires (unless revoked), so this always works.
+function getZohoAccessToken() {
+  if (!ZOHO_CLIENT_ID || !ZOHO_CLIENT_SECRET || !ZOHO_REFRESH_TOKEN) {
+    log('⚠️  Zoho OAuth credentials not fully set — skipping token refresh');
+    return Promise.resolve(null);
   }
 
+  const params = new URLSearchParams({
+    grant_type:    'refresh_token',
+    client_id:     ZOHO_CLIENT_ID,
+    client_secret: ZOHO_CLIENT_SECRET,
+    refresh_token: ZOHO_REFRESH_TOKEN,
+  });
+
+  const body = params.toString();
+  const opts = {
+    hostname: 'accounts.zoho.com',
+    path:     '/oauth/v2/token',
+    method:   'POST',
+    headers:  {
+      'Content-Type':   'application/x-www-form-urlencoded',
+      'Content-Length': Buffer.byteLength(body),
+    },
+  };
+
+  return new Promise((resolve) => {
+    const req = https.request(opts, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.access_token) {
+            log('✅ Zoho access token refreshed successfully');
+            resolve(json.access_token);
+          } else {
+            log(`⚠️  Token refresh failed: ${data}`);
+            resolve(null);
+          }
+        } catch (e) {
+          log(`⚠️  Token refresh parse error: ${e.message}`);
+          resolve(null);
+        }
+      });
+    });
+    req.on('error', (e) => {
+      log(`⚠️  Token refresh request failed: ${e.message}`);
+      resolve(null);
+    });
+    req.write(body);
+    req.end();
+  });
+}
+
+// ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
+// Gets a fresh access token at call time, then POSTs via v3 OAuth API.
+// Falls back to webhook if OAuth credentials are not configured.
+async function notifyCliq(text, messageId) {
+  const threadId = messageId || ZOHO_CLIQ_MESSAGE_ID;
+
+  // ✅ Primary: v3 OAuth API with fresh access token
+  const accessToken = await getZohoAccessToken();
+  if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
+    const payload = { text };
+    if (threadId) {
+      payload.thread_message_id = threadId;
+    }
+
+    const body = JSON.stringify(payload);
+    const opts = {
+      hostname: 'cliq.zoho.com',
+      path:     `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`,
+      method:   'POST',
+      headers:  {
+        'Authorization':  `Zoho-oauthtoken ${accessToken}`,
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    };
+
+    return new Promise((resolve) => {
+      const req = https.request(opts, (res) => {
+        let data = '';
+        res.on('data', chunk => { data += chunk; });
+        res.on('end', () => {
+          log(`📬 Cliq notified via OAuth v3 (HTTP ${res.statusCode}) — thread: ${threadId || 'none'}`);
+          if (res.statusCode !== 200) {
+            log(`⚠️  Cliq v3 response: ${data}`);
+          }
+          resolve();
+        });
+      });
+      req.on('error', (e) => { log(`⚠️  Cliq OAuth notify failed: ${e.message}`); resolve(); });
+      req.write(body);
+      req.end();
+    });
+  }
+
+  // ⬇️ Fallback: webhook (no thread support, no expiry issues)
+  if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
+
+  log('⚠️  OAuth credentials missing — falling back to webhook (no thread support)');
+  const payload = { text };
   const body = JSON.stringify(payload);
   const url  = new URL(ZOHO_CLIQ_WEBHOOK);
   const opts = {
@@ -63,10 +162,10 @@ function notifyCliq(text, messageId) {
 
   return new Promise((resolve) => {
     const req = https.request(opts, (res) => {
-      log(`📬 Cliq notified (HTTP ${res.statusCode}) — thread: ${threadId || 'none'}`);
+      log(`📬 Cliq notified via webhook (HTTP ${res.statusCode})`);
       resolve();
     });
-    req.on('error', (e) => { log(`⚠️  Cliq notify failed: ${e.message}`); resolve(); });
+    req.on('error', (e) => { log(`⚠️  Cliq webhook notify failed: ${e.message}`); resolve(); });
     req.write(body);
     req.end();
   });
@@ -202,7 +301,6 @@ async function republish() {
   log(`🚀 Starting republish for: ${SITE_URL}`);
   log(`🧵 Thread message ID: ${ZOHO_CLIQ_MESSAGE_ID || 'none (will post top-level)'}`);
 
-  // Load session from DUDA_AUTH_BASE64 secret or login fresh
   const hasSession = loadSession();
   if (!hasSession) {
     await loginAndSave();
@@ -284,7 +382,6 @@ async function republish() {
     await browser.close();
     log('✅ Republish complete!');
 
-    // ✅ FIX: pass ZOHO_CLIQ_MESSAGE_ID so it replies in thread
     await notifyCliq('✅ Duda site republished successfully!', ZOHO_CLIQ_MESSAGE_ID);
     await notifyCallback(true, 'Republish successful');
     process.exit(0);
@@ -297,7 +394,6 @@ async function republish() {
     } catch (_) {}
     await browser.close();
 
-    // ✅ FIX: pass ZOHO_CLIQ_MESSAGE_ID so error also replies in thread
     await notifyCliq(`❌ Duda republish failed: ${err.message.split('\n')[0]}`, ZOHO_CLIQ_MESSAGE_ID);
     await notifyCallback(false, err.message);
     process.exit(1);
