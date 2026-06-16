@@ -38,9 +38,13 @@ function log(msg) {
 }
 
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
-function notifyCliq(text) {
+function notifyCliq(text,messageId) {
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
-  const body = JSON.stringify({ text });
+    const payload = { text };
+  if (messageId) {
+    payload.parent_id = messageId;
+  }
+  const body = JSON.stringify(payload);
   const url  = new URL(ZOHO_CLIQ_WEBHOOK);
   const opts = {
     hostname: url.hostname,
