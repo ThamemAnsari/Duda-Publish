@@ -40,7 +40,9 @@ function log(msg) {
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
 function notifyCliq(text,messageId) {
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
-    const payload = { text };
+    const payload = {
+  text: `✅ Duda site republished successfully!\n> Reply to: ${ZOHO_CLIQ_MESSAGE_ID}`
+};
   if (messageId) {
     payload.parent_id = messageId;
   }
