@@ -15,13 +15,13 @@ const https = require('https');
 const { chromium } = require('playwright');
 
 // ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
-const DUDA_EMAIL        = process.env.DUDA_EMAIL        || '';
-const DUDA_PASSWORD     = process.env.DUDA_PASSWORD     || '';
-const DUDA_SITE         = process.env.DUDA_SITE         || 'bc6015ea';
-const DUDA_AUTH_BASE64  = process.env.DUDA_AUTH_BASE64  || '';
-const ZOHO_CLIQ_WEBHOOK = process.env.ZOHO_CLIQ_WEBHOOK || '';
-const ZOHO_CLIQ_MESSAGE_ID = process.env.ZOHO_CLIQ_MESSAGE_ID || '';
-const CALLBACK_URL      = process.env.CALLBACK_URL      || '';
+const DUDA_EMAIL           = process.env.DUDA_EMAIL           || '';
+const DUDA_PASSWORD        = process.env.DUDA_PASSWORD        || '';
+const DUDA_SITE            = process.env.DUDA_SITE            || 'bc6015ea';
+const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
+const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
+const ZOHO_CLIQ_MESSAGE_ID = process.env.ZOHO_CLIQ_MESSAGE_ID || ''; // ✅ from client_payload
+const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
 
 // Site URL: CLI arg → env var → default
 const SITE_URL = process.argv[2]
@@ -38,14 +38,17 @@ function log(msg) {
 }
 
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
-function notifyCliq(text,messageId) {
+function notifyCliq(text, messageId) {
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
-    const payload = {
-  text: `✅ Duda site republished successfully!\n> Reply to: ${ZOHO_CLIQ_MESSAGE_ID}`
-};
-  if (messageId) {
-    payload.parent_id = messageId;
+
+  const payload = { text };
+
+  // ✅ FIX: use the passed messageId (falls back to env var)
+  const threadId = messageId || ZOHO_CLIQ_MESSAGE_ID;
+  if (threadId) {
+    payload.parent_id = threadId;
   }
+
   const body = JSON.stringify(payload);
   const url  = new URL(ZOHO_CLIQ_WEBHOOK);
   const opts = {
@@ -57,9 +60,10 @@ function notifyCliq(text,messageId) {
       'Content-Length': Buffer.byteLength(body),
     },
   };
+
   return new Promise((resolve) => {
     const req = https.request(opts, (res) => {
-      log(`📬 Cliq notified (HTTP ${res.statusCode})`);
+      log(`📬 Cliq notified (HTTP ${res.statusCode}) — thread: ${threadId || 'none'}`);
       resolve();
     });
     req.on('error', (e) => { log(`⚠️  Cliq notify failed: ${e.message}`); resolve(); });
@@ -109,7 +113,6 @@ function loadSession() {
 }
 
 // ─── BROWSER OPTIONS ─────────────────────────────────────────
-// headless: false + Xvfb = looks like real Chrome to Duda
 function getBrowserOptions() {
   return {
     headless: false,
@@ -177,7 +180,7 @@ async function loginAndSave() {
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
 
-  // Prune the auth file to fit inside GitHub Secrets size limit (10 KB)
+  // Prune auth file to fit GitHub Secrets size limit (10 KB)
   try {
     const rawState = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
     const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
@@ -197,6 +200,7 @@ async function loginAndSave() {
 // ─── MAIN REPUBLISH ───────────────────────────────────────────
 async function republish() {
   log(`🚀 Starting republish for: ${SITE_URL}`);
+  log(`🧵 Thread message ID: ${ZOHO_CLIQ_MESSAGE_ID || 'none (will post top-level)'}`);
 
   // Load session from DUDA_AUTH_BASE64 secret or login fresh
   const hasSession = loadSession();
@@ -223,7 +227,6 @@ async function republish() {
     await page.goto(SITE_URL, { waitUntil: 'networkidle', timeout: 90000 });
     await page.waitForTimeout(5000);
 
-    // Screenshot after load — visible in GitHub Actions artifacts tab
     await page.screenshot({ path: 'duda_after_load.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_load.png');
 
@@ -231,7 +234,7 @@ async function republish() {
     if (page.url().includes('/login')) {
       log('Session expired — re-logging in...');
       await browser.close();
-      fs.unlinkSync(AUTH_FILE); // remove stale session
+      fs.unlinkSync(AUTH_FILE);
       await loginAndSave();
       return await republish(); // retry once
     }
@@ -239,7 +242,7 @@ async function republish() {
     const title = await page.title();
     log(`Page title: "${title}"`);
 
-    // Sanity check — blank page = bot detection
+    // Blank page = bot detection
     const html = await page.content();
     if (html.trim() === '<html><head></head><body></body></html>') {
       throw new Error('Blank page received — possible bot detection by Duda');
@@ -264,7 +267,6 @@ async function republish() {
       { timeout: 90000 }
     );
 
-    // Screenshot just before clicking
     await page.screenshot({ path: 'duda_before_click.png', fullPage: true });
     log('📸 Screenshot saved: duda_before_click.png');
 
@@ -276,14 +278,14 @@ async function republish() {
 
     await page.waitForTimeout(4000);
 
-    // Final screenshot
     await page.screenshot({ path: 'duda_after_publish.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_publish.png');
 
     await browser.close();
     log('✅ Republish complete!');
 
-    await notifyCliq('✅ Duda site republished successfully!');
+    // ✅ FIX: pass ZOHO_CLIQ_MESSAGE_ID so it replies in thread
+    await notifyCliq('✅ Duda site republished successfully!', ZOHO_CLIQ_MESSAGE_ID);
     await notifyCallback(true, 'Republish successful');
     process.exit(0);
 
@@ -295,7 +297,8 @@ async function republish() {
     } catch (_) {}
     await browser.close();
 
-    await notifyCliq(`❌ Duda republish failed: ${err.message.split('\n')[0]}`);
+    // ✅ FIX: pass ZOHO_CLIQ_MESSAGE_ID so error also replies in thread
+    await notifyCliq(`❌ Duda republish failed: ${err.message.split('\n')[0]}`, ZOHO_CLIQ_MESSAGE_ID);
     await notifyCallback(false, err.message);
     process.exit(1);
   }
