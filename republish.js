@@ -44,8 +44,6 @@ function log(msg) {
 }
 
 // ─── GET FRESH ZOHO ACCESS TOKEN ─────────────────────────────
-// Exchanges the stored refresh token for a new access token at runtime.
-// The refresh token never expires (unless revoked), so this always works.
 function getZohoAccessToken() {
   if (!ZOHO_CLIENT_ID || !ZOHO_CLIENT_SECRET || !ZOHO_REFRESH_TOKEN) {
     log('⚠️  Zoho OAuth credentials not fully set — skipping token refresh');
@@ -100,12 +98,9 @@ function getZohoAccessToken() {
 }
 
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
-// Gets a fresh access token at call time, then POSTs via v3 OAuth API.
-// Falls back to webhook if OAuth credentials are not configured.
 async function notifyCliq(text, messageId) {
   const threadId = messageId || ZOHO_CLIQ_MESSAGE_ID;
 
-  // ✅ Primary: v3 OAuth API with fresh access token
   const accessToken = await getZohoAccessToken();
   if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
     const payload = { text };
@@ -130,9 +125,11 @@ async function notifyCliq(text, messageId) {
         let data = '';
         res.on('data', chunk => { data += chunk; });
         res.on('end', () => {
-          log(`📬 Cliq notified via OAuth v3 (HTTP ${res.statusCode}) — thread: ${threadId || 'none'}`);
-          if (res.statusCode !== 200) {
-            log(`⚠️  Cliq v3 response: ${data}`);
+          const success = res.statusCode === 200 || res.statusCode === 204;
+          if (success) {
+            log(`📬 Cliq notified via OAuth v3 (HTTP ${res.statusCode}) — thread: ${threadId || 'top-level'}`);
+          } else {
+            log(`⚠️  Cliq v3 failed (HTTP ${res.statusCode}): ${data}`);
           }
           resolve();
         });
@@ -143,7 +140,6 @@ async function notifyCliq(text, messageId) {
     });
   }
 
-  // ⬇️ Fallback: webhook (no thread support, no expiry issues)
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
 
   log('⚠️  OAuth credentials missing — falling back to webhook (no thread support)');
@@ -237,6 +233,37 @@ async function stealthify(page) {
   });
 }
 
+// ─── DISMISS "WHAT'S NEW" MODAL ──────────────────────────────
+// Duda shows a "What's New at Duda" modal on load which keeps firing
+// background analytics requests, preventing networkidle from resolving.
+// This function closes it via the × button or Escape key.
+async function dismissModal(page) {
+  try {
+    // Try clicking the visible × close button inside the modal
+    const closeBtn = page.locator(
+      'button[aria-label*="close" i], ' +
+      'button[aria-label*="dismiss" i], ' +
+      '.modal-close, ' +
+      '[class*="close-button"], ' +
+      '[class*="closeButton"], ' +
+      'button:has([class*="close"]), ' +
+      'button svg[class*="close"]'
+    ).first();
+
+    if (await closeBtn.isVisible({ timeout: 3000 })) {
+      await closeBtn.click();
+      log('✅ Dismissed modal via close button');
+      await page.waitForTimeout(500);
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback: press Escape
+  await page.keyboard.press('Escape');
+  log('ℹ️  Sent Escape to dismiss any open modal');
+  await page.waitForTimeout(500);
+}
+
 // ─── LOGIN & SAVE SESSION ─────────────────────────────────────
 async function loginAndSave() {
   log('No valid session — logging in fresh...');
@@ -322,7 +349,14 @@ async function republish() {
 
   try {
     log('Navigating to Duda dashboard...');
-    await page.goto(SITE_URL, { waitUntil: 'networkidle', timeout: 90000 });
+
+    // ✅ FIX 1: Use 'domcontentloaded' instead of 'networkidle'
+    // 'networkidle' was timing out because the "What's New at Duda" modal
+    // kept firing analytics/tracking requests (Google, Facebook, LinkedIn)
+    // indefinitely, so the network never went fully idle within 90s.
+    await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+    // Give JS/React time to render the editor UI after DOM is ready
     await page.waitForTimeout(5000);
 
     await page.screenshot({ path: 'duda_after_load.png', fullPage: true });
@@ -346,23 +380,17 @@ async function republish() {
       throw new Error('Blank page received — possible bot detection by Duda');
     }
 
-    // Dismiss any modals
-    await page.keyboard.press('Escape');
+    // ✅ FIX 2: Properly dismiss the "What's New at Duda" modal
+    // This modal appears on every load and blocks the Publish button area.
+    // It also keeps firing background analytics requests.
+    log('Checking for and dismissing any modals...');
+    await dismissModal(page);
     await page.waitForTimeout(1000);
-    try {
-      const closeBtn = page.locator(
-        'button[aria-label*="close" i], button[aria-label*="dismiss" i], .modal-close'
-      ).first();
-      if (await closeBtn.isVisible({ timeout: 2000 })) {
-        await closeBtn.click();
-        await page.waitForTimeout(500);
-      }
-    } catch (_) {}
 
     log('Waiting for Publish button...');
     await page.waitForSelector(
       'button:has-text("Republish"), button:has-text("Publish"), [data-testid*="publish"]',
-      { timeout: 90000 }
+      { timeout: 30000 }
     );
 
     await page.screenshot({ path: 'duda_before_click.png', fullPage: true });
@@ -374,10 +402,21 @@ async function republish() {
     await btn.click();
     log('✅ Publish button clicked!');
 
-    await page.waitForTimeout(4000);
-
+    // Wait for the "Republishing your site..." dialog to appear and finish
+    await page.waitForTimeout(2000);
     await page.screenshot({ path: 'duda_after_publish.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_publish.png');
+
+    // ✅ FIX 3: Wait for publish dialog to disappear (confirms completion)
+    try {
+      await page.waitForSelector(
+        'text="Republishing your site", text="Publishing your site"',
+        { state: 'hidden', timeout: 60000 }
+      );
+      log('✅ Publish dialog closed — republish confirmed complete!');
+    } catch (_) {
+      log('ℹ️  Could not confirm publish dialog close, assuming success.');
+    }
 
     await browser.close();
     log('✅ Republish complete!');
