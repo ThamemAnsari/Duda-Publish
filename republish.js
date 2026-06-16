@@ -15,19 +15,22 @@ const https = require('https');
 const { chromium } = require('playwright');
 
 // ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
-const DUDA_EMAIL                  = process.env.DUDA_EMAIL                  || '';
-const DUDA_PASSWORD               = process.env.DUDA_PASSWORD               || '';
-const DUDA_SITE                   = process.env.DUDA_SITE                   || 'bc6015ea';
-const DUDA_AUTH_BASE64            = process.env.DUDA_AUTH_BASE64            || '';
-const ZOHO_CLIQ_WEBHOOK           = process.env.ZOHO_CLIQ_WEBHOOK           || ''; // fallback webhook
-const ZOHO_CLIQ_CHANNEL_ID        = process.env.ZOHO_CLIQ_CHANNEL_ID        || 'P2099672000022436012';
-const ZOHO_CLIQ_MESSAGE_ID        = process.env.ZOHO_CLIQ_MESSAGE_ID        || ''; // from client_payload
-const CALLBACK_URL                = process.env.CALLBACK_URL                || '';
+const DUDA_EMAIL         = process.env.DUDA_EMAIL         || '';
+const DUDA_PASSWORD      = process.env.DUDA_PASSWORD      || '';
+const DUDA_SITE          = process.env.DUDA_SITE          || 'bc6015ea';
+const DUDA_AUTH_BASE64   = process.env.DUDA_AUTH_BASE64   || '';
+const ZOHO_CLIQ_WEBHOOK  = process.env.ZOHO_CLIQ_WEBHOOK  || '';
+const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'P2099672000022436012';
+const CALLBACK_URL       = process.env.CALLBACK_URL       || '';
 
-// ✅ OAuth refresh token secrets (stored permanently in GitHub Secrets)
-const ZOHO_CLIENT_ID              = process.env.ZOHO_CLIENT_ID              || '';
-const ZOHO_CLIENT_SECRET          = process.env.ZOHO_CLIENT_SECRET          || '';
-const ZOHO_REFRESH_TOKEN          = process.env.ZOHO_REFRESH_TOKEN          || '';
+// ✅ Decode message ID — Zoho sometimes sends spaces instead of underscores
+const ZOHO_CLIQ_MESSAGE_ID = decodeURIComponent(process.env.ZOHO_CLIQ_MESSAGE_ID || '')
+  .replaceAll(' ', '_');
+
+// ✅ OAuth refresh token secrets
+const ZOHO_CLIENT_ID     = process.env.ZOHO_CLIENT_ID     || '';
+const ZOHO_CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET || '';
+const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN || '';
 
 // Site URL: CLI arg → env var → default
 const SITE_URL = process.argv[2]
@@ -104,9 +107,7 @@ async function notifyCliq(text, messageId) {
   const accessToken = await getZohoAccessToken();
   if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
     const payload = { text };
-    if (threadId) {
-      payload.thread_message_id = threadId;
-    }
+    if (threadId) payload.thread_message_id = threadId;
 
     const body = JSON.stringify(payload);
     const opts = {
@@ -142,11 +143,11 @@ async function notifyCliq(text, messageId) {
 
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
 
-  log('⚠️  OAuth credentials missing — falling back to webhook (no thread support)');
+  log('⚠️  OAuth credentials missing — falling back to webhook');
   const payload = { text };
-  const body = JSON.stringify(payload);
-  const url  = new URL(ZOHO_CLIQ_WEBHOOK);
-  const opts = {
+  const body    = JSON.stringify(payload);
+  const url     = new URL(ZOHO_CLIQ_WEBHOOK);
+  const opts    = {
     hostname: url.hostname,
     path:     url.pathname + url.search,
     method:   'POST',
@@ -234,39 +235,97 @@ async function stealthify(page) {
 }
 
 // ─── DISMISS "WHAT'S NEW" MODAL ──────────────────────────────
-// Duda shows a "What's New at Duda" modal on load which keeps firing
-// background analytics requests, preventing networkidle from resolving.
-// This function closes it via the × button or Escape key.
+// The modal's overlay div (WhatsNewPopup-module-overlayClassName) sits on top
+// of the Republish button and intercepts all pointer events.
+// Confirmed from error log:
+//   <div class="Modal-module-overlay-2OdDP-aps WhatsNewPopup-module-overlayClassName-bzxXx-aps Modal-module-shown-VYJnW-aps">
+//   from <div id="whats-newWrapper">
 async function dismissModal(page) {
-  try {
-    // Try clicking the visible × close button inside the modal
-    const closeBtn = page.locator(
-      'button[aria-label*="close" i], ' +
-      'button[aria-label*="dismiss" i], ' +
-      '.modal-close, ' +
-      '[class*="close-button"], ' +
-      '[class*="closeButton"], ' +
-      'button:has([class*="close"]), ' +
-      'button svg[class*="close"]'
-    ).first();
+  // Wait for modal to fully render
+  await page.waitForTimeout(2000);
 
-    if (await closeBtn.isVisible({ timeout: 3000 })) {
-      await closeBtn.click();
-      log('✅ Dismissed modal via close button');
-      await page.waitForTimeout(500);
+  // ── Strategy 1: Click the × button inside #whats-newWrapper via evaluate ──
+  try {
+    const closed = await page.evaluate(() => {
+      const wrapper = document.getElementById('whats-newWrapper');
+      if (!wrapper) return false;
+      // Click the first visible button (the × close button)
+      const buttons = wrapper.querySelectorAll('button');
+      for (const btn of buttons) {
+        const rect = btn.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          btn.click();
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (closed) {
+      log('✅ Dismissed WhatsNew modal via #whats-newWrapper button');
+      await page.waitForTimeout(1000);
+
+      // Confirm the overlay is gone
+      const overlayGone = await page.evaluate(() =>
+        !document.querySelector(
+          '#whats-newWrapper .Modal-module-shown-VYJnW-aps, ' +
+          '#whats-newWrapper .WhatsNewPopup-module-overlayClassName-bzxXx-aps'
+        )
+      );
+      if (overlayGone) {
+        log('✅ Modal overlay confirmed removed');
+        return;
+      }
+      log('⚠️  Modal overlay still present after button click — trying next strategy');
+    }
+  } catch (e) {
+    log(`⚠️  Strategy 1 failed: ${e.message}`);
+  }
+
+  // ── Strategy 2: Click the overlay itself to dismiss ──
+  try {
+    const overlay = page.locator('#whats-newWrapper .Modal-module-overlay-2OdDP-aps').first();
+    if (await overlay.isVisible({ timeout: 2000 })) {
+      await overlay.click({ force: true });
+      log('✅ Dismissed modal by clicking overlay');
+      await page.waitForTimeout(1000);
       return;
     }
   } catch (_) {}
 
-  // Fallback: press Escape
+  // ── Strategy 3: Press Escape ──
   await page.keyboard.press('Escape');
   log('ℹ️  Sent Escape to dismiss any open modal');
   await page.waitForTimeout(500);
 }
 
+// ─── WAIT FOR MODAL OVERLAY TO CLEAR ─────────────────────────
+async function waitForModalToClear(page) {
+  log('Waiting for modal overlay to clear...');
+  try {
+    await page.waitForFunction(
+      () => {
+        const wrapper = document.getElementById('whats-newWrapper');
+        if (!wrapper) return true; // no modal at all — clear
+        const overlay = wrapper.querySelector('.Modal-module-shown-VYJnW-aps');
+        return !overlay; // true when overlay is gone
+      },
+      { timeout: 10000 }
+    );
+    log('✅ Modal overlay cleared');
+  } catch (_) {
+    log('ℹ️  Modal overlay wait timed out — using force click as fallback');
+  }
+}
+
 // ─── LOGIN & SAVE SESSION ─────────────────────────────────────
 async function loginAndSave() {
-  log('No valid session — logging in fresh...');
+  log('🔐 Starting fresh login...');
+
+  if (!DUDA_EMAIL || !DUDA_PASSWORD) {
+    throw new Error('DUDA_EMAIL and DUDA_PASSWORD must be set in GitHub Secrets to re-login');
+  }
+
   const browser = await chromium.launch(getBrowserOptions());
   const context = await browser.newContext({
     viewport:  { width: 1366, height: 768 },
@@ -277,16 +336,16 @@ async function loginAndSave() {
 
   await page.goto('https://my.duda.co/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-  if (DUDA_PASSWORD) {
-    try {
-      await page.waitForSelector('input[type="email"]', { timeout: 8000 });
-      await page.fill('input[type="email"]', DUDA_EMAIL);
-      await page.fill('input[type="password"]', DUDA_PASSWORD);
-      await page.locator('button[type="submit"]')
-        .filter({ hasNotText: 'Google' })
-        .first()
-        .click();
-    } catch (_) {}
+  try {
+    await page.waitForSelector('input[type="email"]', { timeout: 8000 });
+    await page.fill('input[type="email"]', DUDA_EMAIL);
+    await page.fill('input[type="password"]', DUDA_PASSWORD);
+    await page.locator('button[type="submit"]')
+      .filter({ hasNotText: 'Google' })
+      .first()
+      .click();
+  } catch (err) {
+    log(`⚠️ Login form interaction failed: ${err.message}`);
   }
 
   log('Waiting for login redirect...');
@@ -294,9 +353,10 @@ async function loginAndSave() {
     () => window.location.href.includes('/home') && !window.location.href.includes('/login'),
     { timeout: 180000 }
   );
+  log('✅ Login redirect detected');
 
   try {
-    log(`🔗 Navigating to site URL: ${SITE_URL}`);
+    log(`🔗 Navigating to site URL post-login: ${SITE_URL}`);
     await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
   } catch (err) {
@@ -308,9 +368,9 @@ async function loginAndSave() {
 
   // Prune auth file to fit GitHub Secrets size limit (10 KB)
   try {
-    const rawState = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+    const rawState      = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
     const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
-    const cleanCookies = rawState.cookies.filter(
+    const cleanCookies  = rawState.cookies.filter(
       c => c.name.startsWith('_dm_') || essentialNames.includes(c.name)
     );
     const prunedState = { cookies: cleanCookies, origins: [] };
@@ -320,16 +380,38 @@ async function loginAndSave() {
     log(`⚠️ Warning: Failed to prune session file: ${err.message}`);
   }
 
-  log('✅ Session saved');
+  log('✅ Session saved to disk');
+}
+
+// ─── CHECK PAGE IS VALID ──────────────────────────────────────
+async function checkPageValid(page) {
+  const currentUrl = page.url();
+  const title      = await page.title();
+
+  log(`Page URL:   ${currentUrl}`);
+  log(`Page title: "${title}"`);
+
+  if (currentUrl.includes('/login')) {
+    return { valid: false, reason: 'login_redirect' };
+  }
+  if (title.includes('403') || title.toLowerCase().includes('forbidden')) {
+    return { valid: false, reason: '403_forbidden' };
+  }
+  const html = await page.content();
+  if (html.trim() === '<html><head></head><body></body></html>') {
+    return { valid: false, reason: 'blank_page' };
+  }
+  return { valid: true };
 }
 
 // ─── MAIN REPUBLISH ───────────────────────────────────────────
-async function republish() {
-  log(`🚀 Starting republish for: ${SITE_URL}`);
+async function republish(isRetry = false) {
+  log(`🚀 Starting republish for: ${SITE_URL}${isRetry ? ' (retry after re-login)' : ''}`);
   log(`🧵 Thread message ID: ${ZOHO_CLIQ_MESSAGE_ID || 'none (will post top-level)'}`);
 
   const hasSession = loadSession();
   if (!hasSession) {
+    log('No session found — logging in fresh...');
     await loginAndSave();
   }
 
@@ -349,69 +431,62 @@ async function republish() {
 
   try {
     log('Navigating to Duda dashboard...');
-
-    // ✅ FIX 1: Use 'domcontentloaded' instead of 'networkidle'
-    // 'networkidle' was timing out because the "What's New at Duda" modal
-    // kept firing analytics/tracking requests (Google, Facebook, LinkedIn)
-    // indefinitely, so the network never went fully idle within 90s.
     await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Give JS/React time to render the editor UI after DOM is ready
+    // Give JS/React time to render the editor UI
     await page.waitForTimeout(5000);
 
     await page.screenshot({ path: 'duda_after_load.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_load.png');
 
-    // Session expired?
-    if (page.url().includes('/login')) {
-      log('Session expired — re-logging in...');
+    // ── Validate page (403, login redirect, blank) ──
+    const { valid, reason } = await checkPageValid(page);
+    if (!valid) {
+      log(`⚠️  Page invalid: ${reason}`);
       await browser.close();
-      fs.unlinkSync(AUTH_FILE);
-      await loginAndSave();
-      return await republish(); // retry once
+
+      if (!isRetry) {
+        log('🔄 Session expired or rejected — re-logging in and retrying once...');
+        if (fs.existsSync(AUTH_FILE)) fs.unlinkSync(AUTH_FILE);
+        await loginAndSave();
+        return await republish(true);
+      } else {
+        throw new Error(`Page still invalid after re-login: ${reason}. Check DUDA_EMAIL / DUDA_PASSWORD secrets.`);
+      }
     }
 
-    const title = await page.title();
-    log(`Page title: "${title}"`);
-
-    // Blank page = bot detection
-    const html = await page.content();
-    if (html.trim() === '<html><head></head><body></body></html>') {
-      throw new Error('Blank page received — possible bot detection by Duda');
-    }
-
-    // ✅ FIX 2: Properly dismiss the "What's New at Duda" modal
-    // This modal appears on every load and blocks the Publish button area.
-    // It also keeps firing background analytics requests.
+    // ── Dismiss the "What's New at Duda" modal ──
     log('Checking for and dismissing any modals...');
     await dismissModal(page);
-    await page.waitForTimeout(1000);
 
+    // ── Wait for modal overlay to fully clear ──
+    await waitForModalToClear(page);
+    await page.waitForTimeout(500);
+
+    // ── Wait for Publish button ──
     log('Waiting for Publish button...');
-    await page.waitForSelector(
-      'button:has-text("Republish"), button:has-text("Publish"), [data-testid*="publish"]',
-      { timeout: 30000 }
-    );
+    const publishBtn = page.locator(
+      'button:has-text("Republish"), button:has-text("Publish"), [data-testid*="publish"]'
+    ).first();
+    await publishBtn.waitFor({ state: 'visible', timeout: 30000 });
 
     await page.screenshot({ path: 'duda_before_click.png', fullPage: true });
     log('📸 Screenshot saved: duda_before_click.png');
 
-    const btn = page.locator(
-      'button:has-text("Republish"), button:has-text("Publish")'
-    ).first();
-    await btn.click();
+    // ── Click Publish — force:true bypasses any remaining overlay ──
+    await publishBtn.scrollIntoViewIfNeeded();
+    await publishBtn.click({ force: true });
     log('✅ Publish button clicked!');
 
-    // Wait for the "Republishing your site..." dialog to appear and finish
     await page.waitForTimeout(2000);
     await page.screenshot({ path: 'duda_after_publish.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_publish.png');
 
-    // ✅ FIX 3: Wait for publish dialog to disappear (confirms completion)
+    // ── Wait for publish dialog to disappear (confirms completion) ──
     try {
-      await page.waitForSelector(
-        'text="Republishing your site", text="Publishing your site"',
-        { state: 'hidden', timeout: 60000 }
+      await page.waitForFunction(
+        () => !document.querySelector('.Modal-module-shown-VYJnW-aps'),
+        { timeout: 60000 }
       );
       log('✅ Publish dialog closed — republish confirmed complete!');
     } catch (_) {
