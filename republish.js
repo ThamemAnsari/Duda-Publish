@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
 // ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
 const DUDA_EMAIL         = process.env.DUDA_EMAIL         || '';
 const DUDA_PASSWORD      = process.env.DUDA_PASSWORD      || '';
-const DUDA_SITE          = process.env.DUDA_SITE          || 'bc6015ea';
+const DUDA_SITE          = process.env.DUDA_SITE          || '3f4c882c';
 const DUDA_AUTH_BASE64   = process.env.DUDA_AUTH_BASE64   || '';
 const ZOHO_CLIQ_WEBHOOK  = process.env.ZOHO_CLIQ_WEBHOOK  || '';
 const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'P2099672000022436012';
@@ -35,7 +35,7 @@ const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN || '';
 // Site URL: CLI arg → env var → default
 const SITE_URL = process.argv[2]
   || process.env.DUDA_SITE_URL
-  || `https://my.duda.co/home/site/${DUDA_SITE}/home`;
+  || `https://infocc3969fa.dudasitebuilder.com/home/site/${DUDA_SITE}/home`;
 
 const AUTH_FILE = path.resolve(__dirname, 'duda_auth.json');
 const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -334,7 +334,16 @@ async function loginAndSave() {
   const page = await context.newPage();
   await stealthify(page);
 
-  await page.goto('https://my.duda.co/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  let loginUrl = 'https://my.duda.co/login';
+  try {
+    const urlObj = new URL(SITE_URL);
+    loginUrl = `${urlObj.origin}/login`;
+  } catch (err) {
+    log(`⚠️ Failed to parse SITE_URL: ${err.message}, defaulting to ${loginUrl}`);
+  }
+
+  log(`🔗 Navigating to login URL: ${loginUrl}`);
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   try {
     await page.waitForSelector('input[type="email"]', { timeout: 8000 });
@@ -378,6 +387,15 @@ async function loginAndSave() {
     log('🧹 Session file pruned successfully.');
   } catch (err) {
     log(`⚠️ Warning: Failed to prune session file: ${err.message}`);
+  }
+
+  // Save base64 version
+  try {
+    const b64 = Buffer.from(fs.readFileSync(AUTH_FILE, 'utf8')).toString('base64');
+    fs.writeFileSync(path.resolve(__dirname, 'duda_auth_b64.txt'), b64);
+    log('✅ base64 session version saved to duda_auth_b64.txt');
+  } catch (err) {
+    log(`⚠️ Warning: Failed to save base64 version: ${err.message}`);
   }
 
   log('✅ Session saved to disk');

@@ -1,9 +1,19 @@
 {
   "cookies": [
     {
+      "name": "_dm_account_uuid",
+      "value": "4a31af84449f4386916b7aa0b35ca3e8",
+      "domain": "infocc3969fa.dudasitebuilder.com",
+      "path": "/",
+      "expires": 1784196531.382609,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
       "name": "JSESSIONID",
-      "value": "743AB9DABFE52B722C93C714BA9848FB",
-      "domain": "my.duda.co",
+      "value": "B617FD73FA1A0F10027CECD3E03B2F0E",
+      "domain": "infocc3969fa.dudasitebuilder.com",
       "path": "/",
       "expires": -1,
       "httpOnly": true,
@@ -12,80 +22,50 @@
     },
     {
       "name": "_dm_remember_me",
-      "value": "b2p1SHFHbGVHcWpDS2RRJTJCQm9LMWlBJTNEJTNEOlF2Qlc5UkFRJTJGQWVKb2N2bUJtandVQSUzRCUzRA",
-      "domain": ".my.duda.co",
+      "value": "WmhoNEVteCUyQjFqejJuY3lrZURTemlRJTNEJTNEOmJTTzJXcmlZSiUyRnF4MHk4amslMkYlMkJzNkElM0QlM0Q",
+      "domain": ".infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1783753121.532883,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_dm_account_uuid",
-      "value": "dab2a87ecb26446d9bd76ce0648c1711",
-      "domain": "my.duda.co",
-      "path": "/",
-      "expires": 1783753121.532953,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_dm_account",
-      "value": "%7B%22name%22%3A%22ansaransuu508%40gmail.com%22%2C%22uuid%22%3A%22dab2a87ecb26446d9bd76ce0648c1711%22%2C%22gaType%22%3A%22RESELLER%22%2C%22lastLogin%22%3A1781159315000%7D",
-      "domain": ".duda.co",
-      "path": "/",
-      "expires": -1,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
-      "name": "_dm_ac_tokens",
-      "value": "rP0D+jqAC3i6ZLyEVai9Mni9GVhTpLR0V7XoRNzWwti4ozbZmsPI5A==",
-      "domain": ".my.duda.co",
-      "path": "/",
-      "expires": 1783753121.53306,
+      "expires": 1784196531.382587,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_dm_se_token_me",
-      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6ImRhYjJhODdlY2IyNjQ0NmQ5YmQ3NmNlMDY0OGMxNzExIiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTE2MTEyNjI3MCwiZXhwIjoxNzgxMTYzNTI2fQ.xn4WJlVhHeX_BVho1aNqbKl3CNBM-AQ9vOmyTVx5zyU",
-      "domain": ".my.duda.co",
+      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6IjRhMzFhZjg0NDQ5ZjQzODY5MTZiN2FhMGIzNWNhM2U4IiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTYwNDUzMTUzOCwiZXhwIjoxNzgxNjA2OTMxfQ.pAU_TkX_TWgS3dJP2FI6SbBZ8u28EkzWiJVLDipk7xs",
+      "domain": ".infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1781163526.771649,
+      "expires": 1781606931.755516,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "AWSALBCORS",
-      "value": "LEHSB0NWwvzkV9lw0ADB2G6dRC0IEbMZqKp6bcFzT7mnEBehx1CLPqqHpOOnms7LSyxuSipSBZge12K/xfhKL2M+hFqYtSgEZRqmx9jk7JKM6C1h1UwkbDKA+jKG",
-      "domain": "ws.push-notifs.com",
+      "value": "N7mjHesOwH5CXN5+N+CbBIFuqk5uYrbbdrq31q+oO7e/8VLnPBtyUX4MLc/12KZ+Jn4S6ddBWMN2+2aJFjqw2Zo10yPatMLrtY+lLZZ63Bc6EOlF6txfb5K3+lLN",
+      "domain": "fundraiser.teameverest.ngo",
       "path": "/",
-      "expires": 1781765932.642824,
+      "expires": 1782209334.111691,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "AWSALBCORS",
-      "value": "zTMosPBqpyiJcnKDrGga0bmeZK9kV2/El7KEvdnmr2lTE54MRB98CMlk2SPLIrwDtVeURKcHVOb0KpCy0MlnyXgONHLnHKqZZ+i1ji7Gq8nS2PCMp79qxZcyG1rF",
-      "domain": "widget-mediator.zopim.com",
+      "value": "U5vl54gDARjfvrMoGZqYicyK/rNzg6N17EreKCLMvTglKjESTxCfNgeswOndkYzvKyBJWX6nVtnPUTE3I7lzrPpHvNrXC7tjVQuttrl1qgzU6l9aSm//K/GqlUqv",
+      "domain": "ws.push-notifs.com",
       "path": "/",
-      "expires": 1781765946.34859,
+      "expires": 1782209335.158648,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "AWSALB",
-      "value": "TaWn6oSfnikUl65YHzS1eI65rlkl+xPKO+NdAI7VV2KbUYP9t0BDnE1DjSCDzDwJV7oDGgzMKxC0T6dz9siWpbhikfN9PPlzaz0hQknun2UL499IE02hd7F/1IKA",
-      "domain": "my.duda.co",
+      "value": "RfZJHVziK0TajqgNM9kZro+xK/Ujilr/MTmFkMW1dE5i7xUFnHsUeLaake4Qb0zt/V9x++p6FMgyjt8DyN7A+UAIRq5KH9BXfak9phZqr6kFKdzApk6BgeKjdMSG",
+      "domain": "infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1781765947.308951,
+      "expires": 1782209335.622898,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"

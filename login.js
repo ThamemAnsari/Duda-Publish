@@ -20,14 +20,16 @@ const { chromium } = require('playwright');
 
 const DUDA_EMAIL    = process.env.DUDA_EMAIL    || '';
 const DUDA_PASSWORD = process.env.DUDA_PASSWORD || '';
-const DUDA_SITE     = process.env.DUDA_SITE     || 'bc6015ea';
-const DUDA_URL      = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
+const DUDA_SITE     = process.env.DUDA_SITE     || '3f4c882c';
+const SITE_URL      = process.argv[2]
+  || process.env.DUDA_SITE_URL
+  || `https://infocc3969fa.dudasitebuilder.com/home/site/${DUDA_SITE}/home`;
 const AUTH_FILE     = path.resolve(__dirname, 'duda_auth.json');
 const CHROME_UA     = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 async function login() {
   console.log('🔐 Opening browser for Duda login...');
-  console.log(`   Site: ${DUDA_URL}`);
+  console.log(`   Site: ${SITE_URL}`);
 
   // headless: false so you can see the browser and handle 2FA if needed
   const browser = await chromium.launch({
@@ -48,7 +50,15 @@ async function login() {
     window.chrome = { runtime: {} };
   });
 
-  await page.goto('https://my.duda.co/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  let loginUrl = 'https://my.duda.co/login';
+  try {
+    const urlObj = new URL(SITE_URL);
+    loginUrl = `${urlObj.origin}/login`;
+  } catch (err) {
+    console.log(`⚠️ Failed to parse SITE_URL: ${err.message}, defaulting to ${loginUrl}`);
+  }
+
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   // Auto-fill credentials if provided
   if (DUDA_EMAIL && DUDA_PASSWORD) {
@@ -81,8 +91,8 @@ async function login() {
   console.log('💾 Saving session...');
 
   try {
-    console.log(`🔗 Navigating to site URL: ${DUDA_URL}`);
-    await page.goto(DUDA_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    console.log(`🔗 Navigating to site URL: ${SITE_URL}`);
+    await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
   } catch (err) {
     console.log(`⚠️ Warning: Navigation to site URL failed: ${err.message}`);
@@ -107,6 +117,14 @@ async function login() {
 
   // Print new base64
   const b64 = Buffer.from(fs.readFileSync(AUTH_FILE, 'utf8')).toString('base64');
+
+  // Save base64 version to file
+  try {
+    fs.writeFileSync(path.resolve(__dirname, 'duda_auth_b64.txt'), b64);
+    console.log('💾 base64 session version saved to duda_auth_b64.txt');
+  } catch (err) {
+    console.log(`⚠️ Warning: Failed to save base64 version to file: ${err.message}`);
+  }
 
   console.log('\n' + '─'.repeat(60));
   console.log('✅ Session saved! Copy this into GitHub Secrets:');
