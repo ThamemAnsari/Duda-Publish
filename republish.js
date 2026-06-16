@@ -33,9 +33,13 @@ const ZOHO_CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET || '';
 const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN || '';
 
 // Site URL: CLI arg → env var → default
-const SITE_URL = process.argv[2]
+let SITE_URL = process.argv[2]
   || process.env.DUDA_SITE_URL
   || `https://infocc3969fa.dudasitebuilder.com/home/site/${DUDA_SITE}/home`;
+
+if (SITE_URL.includes('my.duda.co')) {
+  SITE_URL = SITE_URL.replace('my.duda.co', 'infocc3969fa.dudasitebuilder.com');
+}
 
 const AUTH_FILE = path.resolve(__dirname, 'duda_auth.json');
 const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
