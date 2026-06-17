@@ -106,9 +106,6 @@ function getZohoAccessToken() {
   });
 }
 
-// ─── BUILD CLIQ CARD PAYLOAD ──────────────────────────────────
-// Posts as a new top-level channel message (no thread logic).
-// card + slides + buttons work on the channel messages endpoint.
 function buildCliqCard(success, errorMessage) {
   const timestamp = new Date().toLocaleString('en-IN', {
     timeZone:  'Asia/Kolkata',
@@ -116,43 +113,42 @@ function buildCliqCard(success, errorMessage) {
     timeStyle: 'short',
   });
 
-  const status    = success ? '✅ Success' : '❌ Failed';
-  const cardTitle = success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed';
+  const rows = [
+    { Field: 'Status',    Value: success ? '✅ Success' : '❌ Failed' },
+    { Field: 'Site ID',   Value: DUDA_SITE },
+    { Field: 'Timestamp', Value: timestamp },
+  ];
 
-  const labelData = {
-    '*Status*':    status,
-    '*Site ID*':   DUDA_SITE,
-    '*Timestamp*': timestamp,
-  };
-
-  if (EVENT_ID) labelData['*Event ID*']          = EVENT_ID;
-  if (ORG_NAME) labelData['*Organization Name*'] = ORG_NAME;
-
+  if (EVENT_ID) rows.push({ Field: 'Event ID',          Value: EVENT_ID });
+  if (ORG_NAME) rows.push({ Field: 'Organization Name', Value: ORG_NAME });
   if (!success && errorMessage) {
-    labelData['*Error*'] = errorMessage.split('\n')[0].substring(0, 120);
+    rows.push({ Field: 'Error', Value: errorMessage.split('\n')[0].substring(0, 120) });
   }
 
   return {
-    bot: { name: 'DudaBot' },
     text: success
       ? '✅ Duda site republished successfully!'
       : `❌ Duda republish failed: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
     card: {
-      title: cardTitle,
       theme: 'modern-inline',
+      title: success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed',
+      buttons: [
+        {
+          label: 'Open Duda Site',
+          action: {
+            type: 'open.url',
+            data: { web: DUDA_SITE_LINK },
+          },
+        },
+      ],
     },
     slides: [
       {
-        type: 'label',
-        data: labelData,
-      },
-    ],
-    buttons: [
-      {
-        label: 'Open Duda Site',
-        action: {
-          type: 'open.url',
-          data: { web: DUDA_SITE_LINK },
+        type: 'table',
+        title: 'Republish Details',
+        data: {
+          headers: ['Field', 'Value'],
+          rows,
         },
       },
     ],
