@@ -22,7 +22,7 @@ const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
 const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
 const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'O2099672000000008001';
 const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
-const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || '';
+const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'testforsprint';
 
 // ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
 const EVENT_ID = process.env.EVENT_ID || '';
@@ -165,9 +165,9 @@ async function notifyCliq(success, errorMessage) {
   const payload     = buildCliqCard(success, errorMessage);
   const accessToken = await getZohoAccessToken();
 
-  if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
-    // ✅ Always post as new top-level message
-    const apiPath = `/api/v3/channels/testforsprint/messages`;
+  if (accessToken && ZOHO_CLIQ_CHANNEL_NAME) {
+    // ✅ Use v2 channelsbyname endpoint (correct per Zoho Cliq API docs)
+    const apiPath = `/company/647541281/api/v2/channelsbyname/${ZOHO_CLIQ_CHANNEL_NAME}/message`;
     const body    = JSON.stringify(payload);
     const opts    = {
       hostname: 'cliq.zoho.com',
@@ -189,7 +189,7 @@ async function notifyCliq(success, errorMessage) {
           if (ok) {
             log(`📬 Cliq card posted as new message (HTTP ${res.statusCode})`);
           } else {
-            log(`⚠️  Cliq v3 failed (HTTP ${res.statusCode}): ${data}`);
+            log(`⚠️  Cliq notify failed (HTTP ${res.statusCode}): ${data}`);
           }
           resolve();
         });
