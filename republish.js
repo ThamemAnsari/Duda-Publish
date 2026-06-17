@@ -132,6 +132,7 @@ function buildCliqCard(success, errorMessage) {
   }
 
   return {
+    bot: { name: 'DudaBot' },
     text: success
       ? '✅ Duda site republished successfully!'
       : `❌ Duda republish failed: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
