@@ -22,6 +22,7 @@ const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
 const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
 const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'O2099672000000008001';
 const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
+const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || '';
 
 // ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
 const EVENT_ID = process.env.EVENT_ID || '';
@@ -166,7 +167,7 @@ async function notifyCliq(success, errorMessage) {
 
   if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
     // ✅ Always post as new top-level message
-    const apiPath = `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`;
+    const apiPath = `/api/v3/channels/testforsprint/messages`;
     const body    = JSON.stringify(payload);
     const opts    = {
       hostname: 'cliq.zoho.com',
