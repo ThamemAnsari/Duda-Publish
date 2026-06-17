@@ -15,21 +15,17 @@ const https = require('https');
 const { chromium } = require('playwright');
 
 // ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
-const DUDA_EMAIL         = process.env.DUDA_EMAIL         || '';
-const DUDA_PASSWORD      = process.env.DUDA_PASSWORD      || '';
-const DUDA_SITE          = process.env.DUDA_SITE          || '3f4c882c';
-const DUDA_AUTH_BASE64   = process.env.DUDA_AUTH_BASE64   || '';
-const ZOHO_CLIQ_WEBHOOK  = process.env.ZOHO_CLIQ_WEBHOOK  || '';
+const DUDA_EMAIL           = process.env.DUDA_EMAIL           || '';
+const DUDA_PASSWORD        = process.env.DUDA_PASSWORD        || '';
+const DUDA_SITE            = process.env.DUDA_SITE            || '3f4c882c';
+const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
+const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
 const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'O2099672000000008001';
-const CALLBACK_URL       = process.env.CALLBACK_URL       || '';
+const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
 
 // ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
-const EVENT_ID           = process.env.EVENT_ID           || '';
-const ORG_NAME           = process.env.ORG_NAME           || '';
-
-// ✅ Decode message ID — Zoho sometimes sends spaces instead of underscores
-const ZOHO_CLIQ_MESSAGE_ID = decodeURIComponent(process.env.ZOHO_CLIQ_MESSAGE_ID || '')
-  .replaceAll(' ', '_');
+const EVENT_ID = process.env.EVENT_ID || '';
+const ORG_NAME = process.env.ORG_NAME || '';
 
 // ✅ OAuth refresh token secrets
 const ZOHO_CLIENT_ID     = process.env.ZOHO_CLIENT_ID     || '';
@@ -45,8 +41,8 @@ if (SITE_URL.includes('my.duda.co')) {
   SITE_URL = SITE_URL.replace('my.duda.co', 'infocc3969fa.dudasitebuilder.com');
 }
 
-const AUTH_FILE = path.resolve(__dirname, 'duda_auth.json');
-const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+const AUTH_FILE    = path.resolve(__dirname, 'duda_auth.json');
+const CHROME_UA    = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 const DUDA_SITE_LINK = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
 
 // ─── LOGGING ─────────────────────────────────────────────────
@@ -110,18 +106,17 @@ function getZohoAccessToken() {
 }
 
 // ─── BUILD CLIQ CARD PAYLOAD ──────────────────────────────────
-// Mirrors the same card structure used in Deluge (title + slides + button),
-// with success ✅ or error ❌ status injected into the label data.
+// Posts as a new top-level channel message (no thread logic).
+// card + slides + buttons work on the channel messages endpoint.
 function buildCliqCard(success, errorMessage) {
   const timestamp = new Date().toLocaleString('en-IN', {
-    timeZone:   'Asia/Kolkata',
-    dateStyle:  'medium',
-    timeStyle:  'short',
+    timeZone:  'Asia/Kolkata',
+    dateStyle: 'medium',
+    timeStyle: 'short',
   });
 
-  const status     = success ? '✅ Success' : '❌ Failed';
-  const cardTitle  = success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed';
-  const theme      = success ? 'modern-inline' : 'modern-inline';
+  const status    = success ? '✅ Success' : '❌ Failed';
+  const cardTitle = success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed';
 
   const labelData = {
     '*Status*':    status,
@@ -129,9 +124,8 @@ function buildCliqCard(success, errorMessage) {
     '*Timestamp*': timestamp,
   };
 
-  // ✅ Inject event context from Deluge if passed through
-  if (EVENT_ID)  labelData['*Event ID*']         = EVENT_ID;
-  if (ORG_NAME)  labelData['*Organization Name*'] = ORG_NAME;
+  if (EVENT_ID) labelData['*Event ID*']          = EVENT_ID;
+  if (ORG_NAME) labelData['*Organization Name*'] = ORG_NAME;
 
   if (!success && errorMessage) {
     labelData['*Error*'] = errorMessage.split('\n')[0].substring(0, 120);
@@ -143,7 +137,7 @@ function buildCliqCard(success, errorMessage) {
       : `❌ Duda republish failed: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
     card: {
       title: cardTitle,
-      theme,
+      theme: 'modern-inline',
     },
     slides: [
       {
@@ -156,9 +150,7 @@ function buildCliqCard(success, errorMessage) {
         label: 'Open Duda Site',
         action: {
           type: 'open.url',
-          data: {
-            web: DUDA_SITE_LINK,
-          },
+          data: { web: DUDA_SITE_LINK },
         },
       },
     ],
@@ -166,20 +158,16 @@ function buildCliqCard(success, errorMessage) {
 }
 
 // ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
-async function notifyCliq(success, errorMessage, messageId) {
-  const threadId = messageId || ZOHO_CLIQ_MESSAGE_ID;
-  const payload  = buildCliqCard(success, errorMessage);
-
+// Always posts as a new top-level channel message — no thread replies.
+async function notifyCliq(success, errorMessage) {
+  const payload     = buildCliqCard(success, errorMessage);
   const accessToken = await getZohoAccessToken();
-  if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
-    // ✅ Cliq v3: thread replies go to /threads/{threadId}/messages endpoint
-    // Passing thread_message_id in the body causes HTTP 400 "Incorrect values submitted"
-    const apiPath = threadId
-      ? `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/threads/${threadId}/messages`
-      : `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`;
 
-    const body = JSON.stringify(payload);
-    const opts = {
+  if (accessToken && ZOHO_CLIQ_CHANNEL_ID) {
+    // ✅ Always post as new top-level message
+    const apiPath = `/api/v3/channels/${ZOHO_CLIQ_CHANNEL_ID}/messages`;
+    const body    = JSON.stringify(payload);
+    const opts    = {
       hostname: 'cliq.zoho.com',
       path:     apiPath,
       method:   'POST',
@@ -197,7 +185,7 @@ async function notifyCliq(success, errorMessage, messageId) {
         res.on('end', () => {
           const ok = res.statusCode === 200 || res.statusCode === 204;
           if (ok) {
-            log(`📬 Cliq card notified via OAuth v3 (HTTP ${res.statusCode}) — thread: ${threadId || 'top-level'}`);
+            log(`📬 Cliq card posted as new message (HTTP ${res.statusCode})`);
           } else {
             log(`⚠️  Cliq v3 failed (HTTP ${res.statusCode}): ${data}`);
           }
@@ -210,14 +198,14 @@ async function notifyCliq(success, errorMessage, messageId) {
     });
   }
 
-  // ── Fallback: webhook (no threading support, plain text only) ──
+  // ── Fallback: webhook (plain text only) ──
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
 
   log('⚠️  OAuth credentials missing — falling back to webhook (plain text only)');
   const fallbackPayload = { text: payload.text };
-  const body    = JSON.stringify(fallbackPayload);
-  const url     = new URL(ZOHO_CLIQ_WEBHOOK);
-  const opts    = {
+  const body = JSON.stringify(fallbackPayload);
+  const url  = new URL(ZOHO_CLIQ_WEBHOOK);
+  const opts = {
     hostname: url.hostname,
     path:     url.pathname + url.search,
     method:   'POST',
@@ -305,13 +293,7 @@ async function stealthify(page) {
 }
 
 // ─── DISMISS "WHAT'S NEW" MODAL ──────────────────────────────
-// The modal's overlay div (WhatsNewPopup-module-overlayClassName) sits on top
-// of the Republish button and intercepts all pointer events.
-// Confirmed from error log:
-//   <div class="Modal-module-overlay-2OdDP-aps WhatsNewPopup-module-overlayClassName-bzxXx-aps Modal-module-shown-VYJnW-aps">
-//   from <div id="whats-newWrapper">
 async function dismissModal(page) {
-  // Wait for modal to fully render
   await page.waitForTimeout(2000);
 
   // ── Strategy 1: Click the × button inside #whats-newWrapper via evaluate ──
@@ -319,7 +301,6 @@ async function dismissModal(page) {
     const closed = await page.evaluate(() => {
       const wrapper = document.getElementById('whats-newWrapper');
       if (!wrapper) return false;
-      // Click the first visible button (the × close button)
       const buttons = wrapper.querySelectorAll('button');
       for (const btn of buttons) {
         const rect = btn.getBoundingClientRect();
@@ -335,7 +316,6 @@ async function dismissModal(page) {
       log('✅ Dismissed WhatsNew modal via #whats-newWrapper button');
       await page.waitForTimeout(1000);
 
-      // Confirm the overlay is gone
       const overlayGone = await page.evaluate(() =>
         !document.querySelector(
           '#whats-newWrapper .Modal-module-shown-VYJnW-aps, ' +
@@ -376,9 +356,9 @@ async function waitForModalToClear(page) {
     await page.waitForFunction(
       () => {
         const wrapper = document.getElementById('whats-newWrapper');
-        if (!wrapper) return true; // no modal at all — clear
+        if (!wrapper) return true;
         const overlay = wrapper.querySelector('.Modal-module-shown-VYJnW-aps');
-        return !overlay; // true when overlay is gone
+        return !overlay;
       },
       { timeout: 10000 }
     );
@@ -445,11 +425,11 @@ async function loginAndSave() {
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
 
-  // Prune auth file to fit GitHub Secrets size limit (10 KB)
+  // Prune auth file to fit GitHub Secrets size limit
   try {
-    const rawState      = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+    const rawState       = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
     const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
-    const cleanCookies  = rawState.cookies.filter(
+    const cleanCookies   = rawState.cookies.filter(
       c => c.name.startsWith('_dm_') || essentialNames.includes(c.name)
     );
     const prunedState = { cookies: cleanCookies, origins: [] };
@@ -495,7 +475,6 @@ async function checkPageValid(page) {
 // ─── MAIN REPUBLISH ───────────────────────────────────────────
 async function republish(isRetry = false) {
   log(`🚀 Starting republish for: ${SITE_URL}${isRetry ? ' (retry after re-login)' : ''}`);
-  log(`🧵 Thread message ID: ${ZOHO_CLIQ_MESSAGE_ID || 'none (will post top-level)'}`);
   log(`📋 Event ID: ${EVENT_ID || 'not provided'} | Org: ${ORG_NAME || 'not provided'}`);
 
   const hasSession = loadSession();
@@ -586,7 +565,7 @@ async function republish(isRetry = false) {
     log('✅ Republish complete!');
 
     // ── Send success card to Cliq ──
-    await notifyCliq(true, null, ZOHO_CLIQ_MESSAGE_ID);
+    await notifyCliq(true, null);
     await notifyCallback(true, 'Republish successful');
     process.exit(0);
 
@@ -599,7 +578,7 @@ async function republish(isRetry = false) {
     await browser.close();
 
     // ── Send error card to Cliq ──
-    await notifyCliq(false, err.message, ZOHO_CLIQ_MESSAGE_ID);
+    await notifyCliq(false, err.message);
     await notifyCallback(false, err.message);
     process.exit(1);
   }
