@@ -132,15 +132,6 @@ function buildCliqCard(success, errorMessage) {
     card: {
       theme: 'modern-inline',
       title: success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed',
-      buttons: [
-        {
-          label: 'Open Duda Site',
-          action: {
-            type: 'open.url',
-            data: { web: DUDA_SITE_LINK },
-          },
-        },
-      ],
     },
     slides: [
       {
@@ -149,6 +140,15 @@ function buildCliqCard(success, errorMessage) {
         data: {
           headers: ['Field', 'Value'],
           rows,
+        },
+      },
+    ],
+    buttons: [
+      {
+        label: 'Open Duda Site',
+        action: {
+          type: 'open.url',
+          data: { web: DUDA_SITE_LINK },
         },
       },
     ],
