@@ -60,14 +60,17 @@ jobs:
           DUDA_AUTH_BASE64:      ${{ secrets.DUDA_AUTH_BASE64 }}
           DUDA_SITE:             ${{ secrets.DUDA_SITE }}
           ZOHO_CLIQ_WEBHOOK:     ${{ secrets.ZOHO_CLIQ_WEBHOOK }}
-          ZOHO_CLIENT_ID:        ${{ secrets.ZOHO_CLIENT_ID }}        # ✅ added
-          ZOHO_CLIENT_SECRET:    ${{ secrets.ZOHO_CLIENT_SECRET }}    # ✅ added
-          ZOHO_REFRESH_TOKEN:    ${{ secrets.ZOHO_REFRESH_TOKEN }}    # ✅ added
-          ZOHO_CLIQ_CHANNEL_ID:  O2099672000000008001                 # ✅ added (hardcoded)
+          ZOHO_CLIENT_ID:        ${{ secrets.ZOHO_CLIENT_ID }}
+          ZOHO_CLIENT_SECRET:    ${{ secrets.ZOHO_CLIENT_SECRET }}
+          ZOHO_REFRESH_TOKEN:    ${{ secrets.ZOHO_REFRESH_TOKEN }}
+          ZOHO_CLIQ_CHANNEL_ID:  O2099672000000008001
           ZOHO_CLIQ_MESSAGE_ID:  ${{ github.event.client_payload.message_id || '' }}
           CALLBACK_URL:          ${{ secrets.CALLBACK_URL }}
+          # ✅ Event metadata from Deluge via EC2 — shown in Cliq card
+          EVENT_ID:              ${{ github.event.client_payload.event_id || '' }}
+          ORG_NAME:              ${{ github.event.client_payload.org_name || '' }}
           # Site URL: from webhook payload OR manual input
-          DUDA_SITE_URL: ${{ github.event.client_payload.site_url || github.event.inputs.site_url || '' }}
+          DUDA_SITE_URL:         ${{ github.event.client_payload.site_url || github.event.inputs.site_url || '' }}
         run: node republish.js
 
       # 7. Upload screenshots — always, even on failure
