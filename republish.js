@@ -115,11 +115,11 @@ function buildCliqCard(success, errorMessage) {
 
   const rows = [
     { Field: 'Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
-    { Field: 'Organization Name',       Value: ORG_NAME || DUDA_SITE },
     { Field: 'Published Date and time', Value: timestamp },
   ];
 
-  if (EVENT_ID) rows.push({ Field: 'Event ID', Value: EVENT_ID });
+  if (EVENT_ID) rows.push({ Field: 'Event ID',          Value: EVENT_ID });
+  if (ORG_NAME) rows.push({ Field: 'Organization Name', Value: ORG_NAME });
   if (!success && errorMessage) {
     rows.push({ Field: 'Error', Value: errorMessage.split('\n')[0].substring(0, 120) });
   }
@@ -135,13 +135,12 @@ function buildCliqCard(success, errorMessage) {
     slides: [
       {
         type: 'table',
-        data: {                          // ← "Republish Details" title removed
+        data: {
           headers: ['Field', 'Value'],
           rows,
         },
       },
     ],
-                                        // ← buttons block removed entirely
   };
 }
 
