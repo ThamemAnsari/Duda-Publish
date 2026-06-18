@@ -115,19 +115,21 @@ function buildCliqCard(success, errorMessage) {
 
   const rows = [
     { Field: 'Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
-    { Field: 'Published Date and time', Value: timestamp },
+    { Field: 'Published Date and Time', Value: timestamp },
+    { Field: 'Event ID',                Value: EVENT_ID || 'N/A' },   // ← always show
+    { Field: 'Organization Name',       Value: ORG_NAME || 'N/A' },   // ← always show
   ];
 
-  if (EVENT_ID) rows.push({ Field: 'Event ID',          Value: EVENT_ID });
-  if (ORG_NAME) rows.push({ Field: 'Organization Name', Value: ORG_NAME });
   if (!success && errorMessage) {
     rows.push({ Field: 'Error', Value: errorMessage.split('\n')[0].substring(0, 120) });
   }
 
+  const eventLabel = EVENT_ID ? ` — ${EVENT_ID}` : '';
+
   return {
     text: success
-      ? '⚠️ Volunteer Signup Closed!'
-      : `❌ Duda republish failed: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
+      ? `✅ Volunteer Signup Closed${eventLabel}`
+      : `❌ Duda republish failed${eventLabel}: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
     card: {
       theme: 'modern-inline',
       title: success ? 'Form Submission Closed' : 'Duda Republish Failed',

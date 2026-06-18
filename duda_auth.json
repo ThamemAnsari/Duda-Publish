@@ -1,18 +1,8 @@
 {
   "cookies": [
     {
-      "name": "_dm_account_uuid",
-      "value": "4a31af84449f4386916b7aa0b35ca3e8",
-      "domain": "infocc3969fa.dudasitebuilder.com",
-      "path": "/",
-      "expires": 1784196531.382609,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "Lax"
-    },
-    {
       "name": "JSESSIONID",
-      "value": "B617FD73FA1A0F10027CECD3E03B2F0E",
+      "value": "78EAC5D958D99A606C8681DE52A7E04B",
       "domain": "infocc3969fa.dudasitebuilder.com",
       "path": "/",
       "expires": -1,
@@ -22,50 +12,50 @@
     },
     {
       "name": "_dm_remember_me",
-      "value": "WmhoNEVteCUyQjFqejJuY3lrZURTemlRJTNEJTNEOmJTTzJXcmlZSiUyRnF4MHk4amslMkYlMkJzNkElM0QlM0Q",
+      "value": "akM4NnJvYndOeGRua0RQVHFhZ1p5dyUzRCUzRDpxNGRRaDdRUFhpSDYlMkZIR2pPY2Y4TnclM0QlM0Q",
       "domain": ".infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1784196531.382587,
+      "expires": 1784368441.330974,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_dm_account_uuid",
+      "value": "4a31af84449f4386916b7aa0b35ca3e8",
+      "domain": "infocc3969fa.dudasitebuilder.com",
+      "path": "/",
+      "expires": 1784368441.330995,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "_dm_se_token_me",
-      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6IjRhMzFhZjg0NDQ5ZjQzODY5MTZiN2FhMGIzNWNhM2U4IiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTYwNDUzMTUzOCwiZXhwIjoxNzgxNjA2OTMxfQ.pAU_TkX_TWgS3dJP2FI6SbBZ8u28EkzWiJVLDipk7xs",
+      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50VXVpZCI6IjRhMzFhZjg0NDQ5ZjQzODY5MTZiN2FhMGIzNWNhM2U4IiwiYWNjb3VudE5hbWUiOiJhbnNhcmFuc3V1NTA4QGdtYWlsLmNvbSIsImNyZWF0aW9uVGltZSI6MTc4MTc3NjQ0MTUzMiwiZXhwIjoxNzgxNzc4ODQxfQ.JxS4Alj4PHBGO5soeSg_ctt-kpdOY8bbeEckwl67NpE",
       "domain": ".infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1781606931.755516,
+      "expires": 1781778841.963541,
       "httpOnly": true,
       "secure": true,
       "sameSite": "Lax"
     },
     {
       "name": "AWSALBCORS",
-      "value": "N7mjHesOwH5CXN5+N+CbBIFuqk5uYrbbdrq31q+oO7e/8VLnPBtyUX4MLc/12KZ+Jn4S6ddBWMN2+2aJFjqw2Zo10yPatMLrtY+lLZZ63Bc6EOlF6txfb5K3+lLN",
+      "value": "tC93YHqYsWRVp6xYy79+ee85jK5j9o6fYfXkaTq0e87twbs80iKfyccioGxWiL7MLdXOkfIrvOHTyGiyPsxolUfI8VG21hR6NFUae+TrpehmkS/tcuxHSoPCA8nl",
       "domain": "fundraiser.teameverest.ngo",
       "path": "/",
-      "expires": 1782209334.111691,
-      "httpOnly": false,
-      "secure": true,
-      "sameSite": "None"
-    },
-    {
-      "name": "AWSALBCORS",
-      "value": "U5vl54gDARjfvrMoGZqYicyK/rNzg6N17EreKCLMvTglKjESTxCfNgeswOndkYzvKyBJWX6nVtnPUTE3I7lzrPpHvNrXC7tjVQuttrl1qgzU6l9aSm//K/GqlUqv",
-      "domain": "ws.push-notifs.com",
-      "path": "/",
-      "expires": 1782209335.158648,
+      "expires": 1782381244.744091,
       "httpOnly": false,
       "secure": true,
       "sameSite": "None"
     },
     {
       "name": "AWSALB",
-      "value": "RfZJHVziK0TajqgNM9kZro+xK/Ujilr/MTmFkMW1dE5i7xUFnHsUeLaake4Qb0zt/V9x++p6FMgyjt8DyN7A+UAIRq5KH9BXfak9phZqr6kFKdzApk6BgeKjdMSG",
+      "value": "hfeJAiCXnUJR2n2GWAf0DuqIhMOEfAMiCKh3wKkgFiwqWXnCBRQHJC/s/0Nsq5foW0WFwltCXJyEz+1/n94ny+vI3XoZbulo/1SYtI3Jwl69ugIxKZZU5ynq+U0+",
       "domain": "infocc3969fa.dudasitebuilder.com",
       "path": "/",
-      "expires": 1782209335.622898,
+      "expires": 1782381245.482977,
       "httpOnly": false,
       "secure": false,
       "sameSite": "Lax"
