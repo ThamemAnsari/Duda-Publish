@@ -114,10 +114,10 @@ function buildCliqCard(success, errorMessage) {
   });
 
   const rows = [
-    { Field: 'Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
-    { Field: 'Published Date and Time', Value: timestamp },
     { Field: 'Event ID',                Value: EVENT_ID || 'N/A' },   // ← always show
-    { Field: 'Organization Name',       Value: ORG_NAME || 'N/A' },   // ← always show
+    { Field: 'Organization Name',       Value: ORG_NAME || 'N/A' },
+    { Field: 'Website Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
+    { Field: 'Published Date and Time', Value: timestamp },
   ];
 
   if (!success && errorMessage) {
