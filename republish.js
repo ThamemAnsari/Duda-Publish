@@ -114,13 +114,12 @@ function buildCliqCard(success, errorMessage) {
   });
 
   const rows = [
-    { Field: 'Status',    Value: success ? '✅ Success' : '❌ Failed' },
-    { Field: 'Site ID',   Value: DUDA_SITE },
-    { Field: 'Timestamp', Value: timestamp },
+    { Field: 'Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
+    { Field: 'Organization Name',       Value: ORG_NAME || DUDA_SITE },
+    { Field: 'Published Date and time', Value: timestamp },
   ];
 
-  if (EVENT_ID) rows.push({ Field: 'Event ID',          Value: EVENT_ID });
-  if (ORG_NAME) rows.push({ Field: 'Organization Name', Value: ORG_NAME });
+  if (EVENT_ID) rows.push({ Field: 'Event ID', Value: EVENT_ID });
   if (!success && errorMessage) {
     rows.push({ Field: 'Error', Value: errorMessage.split('\n')[0].substring(0, 120) });
   }
@@ -136,22 +135,13 @@ function buildCliqCard(success, errorMessage) {
     slides: [
       {
         type: 'table',
-        title: 'Republish Details',
-        data: {
+        data: {                          // ← "Republish Details" title removed
           headers: ['Field', 'Value'],
           rows,
         },
       },
     ],
-    buttons: [
-      {
-        label: 'Open Duda Site',
-        action: {
-          type: 'open.url',
-          data: { web: DUDA_SITE_LINK },
-        },
-      },
-    ],
+                                        // ← buttons block removed entirely
   };
 }
 
