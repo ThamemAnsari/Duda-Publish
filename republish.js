@@ -22,7 +22,7 @@ const DUDA_AUTH_BASE64     = process.env.DUDA_AUTH_BASE64     || '';
 const ZOHO_CLIQ_WEBHOOK    = process.env.ZOHO_CLIQ_WEBHOOK    || '';
 const ZOHO_CLIQ_CHANNEL_ID = process.env.ZOHO_CLIQ_CHANNEL_ID || 'O2099672000000008001';
 const CALLBACK_URL         = process.env.CALLBACK_URL         || '';
-const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'testforsprint';
+const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'techgeeks';
 
 // ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
 const EVENT_ID = process.env.EVENT_ID || '';
@@ -127,11 +127,11 @@ function buildCliqCard(success, errorMessage) {
 
   return {
     text: success
-      ? '✅ Duda site republished successfully!'
+      ? '⚠️ Volunteer Signup Closed!'
       : `❌ Duda republish failed: ${(errorMessage || 'Unknown error').split('\n')[0]}`,
     card: {
       theme: 'modern-inline',
-      title: success ? 'Duda Site Republished Successfully' : 'Duda Republish Failed',
+      title: success ? 'Form Submission Closed' : 'Duda Republish Failed',
     },
     slides: [
       {
