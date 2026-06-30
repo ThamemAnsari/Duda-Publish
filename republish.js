@@ -21,7 +21,7 @@ const DUDA_SITE              = process.env.DUDA_SITE              || '3f4c882c';
 const ZOHO_CLIQ_WEBHOOK      = process.env.ZOHO_CLIQ_WEBHOOK      || '';
 const ZOHO_CLIQ_CHANNEL_ID   = process.env.ZOHO_CLIQ_CHANNEL_ID   || 'O2099672000000008001';
 const CALLBACK_URL           = process.env.CALLBACK_URL           || '';
-const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'techgeeks';
+const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'testforsprint';
 
 // ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
 const EVENT_ID = process.env.EVENT_ID || '';
