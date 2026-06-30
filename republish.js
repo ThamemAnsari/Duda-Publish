@@ -14,29 +14,35 @@ const path  = require('path');
 const https = require('https');
 const { chromium } = require('playwright');
 
+// ─── CONFIG FROM ENV (set as GitHub Secrets) ─────────────────
 const DUDA_EMAIL             = process.env.DUDA_EMAIL             || '';
 const DUDA_PASSWORD          = process.env.DUDA_PASSWORD          || '';
 const DUDA_SITE              = process.env.DUDA_SITE              || '3f4c882c';
-const DUDA_AUTH_BASE64       = process.env.DUDA_AUTH_BASE64       || '';
 const ZOHO_CLIQ_WEBHOOK      = process.env.ZOHO_CLIQ_WEBHOOK      || '';
 const ZOHO_CLIQ_CHANNEL_ID   = process.env.ZOHO_CLIQ_CHANNEL_ID   || 'O2099672000000008001';
 const CALLBACK_URL           = process.env.CALLBACK_URL           || '';
 const ZOHO_CLIQ_CHANNEL_NAME = process.env.ZOHO_CLIQ_CHANNEL_NAME || 'techgeeks';
-const EVENT_ID               = process.env.EVENT_ID               || '';
-const ORG_NAME               = process.env.ORG_NAME               || '';
-const ZOHO_CLIENT_ID         = process.env.ZOHO_CLIENT_ID         || '';
-const ZOHO_CLIENT_SECRET     = process.env.ZOHO_CLIENT_SECRET     || '';
-const ZOHO_REFRESH_TOKEN     = process.env.ZOHO_REFRESH_TOKEN     || '';
+
+// ✅ Event metadata — passed from Deluge → EC2 → GitHub Actions client_payload
+const EVENT_ID = process.env.EVENT_ID || '';
+const ORG_NAME = process.env.ORG_NAME || '';
+
+// ✅ OAuth refresh token secrets
+const ZOHO_CLIENT_ID     = process.env.ZOHO_CLIENT_ID     || '';
+const ZOHO_CLIENT_SECRET = process.env.ZOHO_CLIENT_SECRET || '';
+const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN || '';
 
 const AUTH_FILE      = path.resolve(__dirname, 'duda_auth.json');
 const CHROME_UA      = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-// FIX 5: always use my.duda.co for republish navigation — cookies from login are valid here
+// ✅ Always use my.duda.co — login cookies are valid for this domain
 const DUDA_SITE_LINK = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
 
+// ─── LOGGING ─────────────────────────────────────────────────
 function log(msg) {
   console.log(`[DUDA] [${new Date().toISOString()}] ${msg}`);
 }
 
+// ─── GET FRESH ZOHO ACCESS TOKEN ─────────────────────────────
 function getZohoAccessToken() {
   if (!ZOHO_CLIENT_ID || !ZOHO_CLIENT_SECRET || !ZOHO_REFRESH_TOKEN) {
     log('⚠️  Zoho OAuth credentials not fully set — skipping token refresh');
@@ -73,15 +79,16 @@ function getZohoAccessToken() {
   });
 }
 
+// ─── BUILD CLIQ CARD ─────────────────────────────────────────
 function buildCliqCard(success, errorMessage) {
   const timestamp = new Date().toLocaleString('en-IN', {
     timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
   });
   const rows = [
-    { Field: 'Event ID',                Value: EVENT_ID || 'N/A' },
-    { Field: 'Organization Name',       Value: ORG_NAME || 'N/A' },
+    { Field: 'Event ID',                 Value: EVENT_ID || 'N/A' },
+    { Field: 'Organization Name',        Value: ORG_NAME || 'N/A' },
     { Field: 'Website Published Status', Value: success ? '✅ Published' : '❌ Failed' },
-    { Field: 'Published Date and Time', Value: timestamp },
+    { Field: 'Published Date and Time',  Value: timestamp },
   ];
   if (!success && errorMessage) {
     rows.push({ Field: 'Error', Value: errorMessage.split('\n')[0].substring(0, 120) });
@@ -96,9 +103,11 @@ function buildCliqCard(success, errorMessage) {
   };
 }
 
+// ─── NOTIFY ZOHO CLIQ ────────────────────────────────────────
 async function notifyCliq(success, errorMessage) {
   const payload     = buildCliqCard(success, errorMessage);
   const accessToken = await getZohoAccessToken();
+
   if (accessToken && ZOHO_CLIQ_CHANNEL_NAME) {
     const apiPath = `/company/647541281/api/v2/channelsbyname/${ZOHO_CLIQ_CHANNEL_NAME}/message`;
     const body    = JSON.stringify(payload);
@@ -122,6 +131,7 @@ async function notifyCliq(success, errorMessage) {
       req.end();
     });
   }
+
   if (!ZOHO_CLIQ_WEBHOOK) return Promise.resolve();
   log('⚠️  OAuth credentials missing — falling back to webhook (plain text only)');
   const fallbackPayload = { text: payload.text };
@@ -139,6 +149,7 @@ async function notifyCliq(success, errorMessage) {
   });
 }
 
+// ─── NOTIFY EC2 CALLBACK (optional) ──────────────────────────
 function notifyCallback(success, message) {
   if (!CALLBACK_URL) return Promise.resolve();
   const body = JSON.stringify({ success, message });
@@ -155,6 +166,7 @@ function notifyCallback(success, message) {
   });
 }
 
+// ─── BROWSER OPTIONS ─────────────────────────────────────────
 function getBrowserOptions() {
   return {
     headless: false,
@@ -168,6 +180,7 @@ function getBrowserOptions() {
   };
 }
 
+// ─── STEALTH ─────────────────────────────────────────────────
 async function stealthify(page) {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver',  { get: () => undefined });
@@ -177,6 +190,7 @@ async function stealthify(page) {
   });
 }
 
+// ─── DISMISS "WHAT'S NEW" MODAL ──────────────────────────────
 async function dismissModal(page) {
   await page.waitForTimeout(2000);
   try {
@@ -200,6 +214,7 @@ async function dismissModal(page) {
       log('⚠️  Modal overlay still present — trying next strategy');
     }
   } catch (e) { log(`⚠️  Strategy 1 failed: ${e.message}`); }
+
   try {
     const overlay = page.locator('#whats-newWrapper .Modal-module-overlay-2OdDP-aps').first();
     if (await overlay.isVisible({ timeout: 2000 })) {
@@ -209,15 +224,16 @@ async function dismissModal(page) {
       return;
     }
   } catch (_) {}
+
   await page.keyboard.press('Escape');
   log('ℹ️  Sent Escape to dismiss any open modal');
   await page.waitForTimeout(500);
 }
 
+// ─── WAIT FOR MODAL OVERLAY TO CLEAR ─────────────────────────
 async function waitForModalToClear(page) {
   log('Waiting for modal overlay to clear...');
   try {
-    // FIX 3: undefined as second arg so { timeout } is options not arg
     await page.waitForFunction(
       () => {
         const wrapper = document.getElementById('whats-newWrapper');
@@ -234,23 +250,25 @@ async function waitForModalToClear(page) {
   }
 }
 
+// ─── LOGIN & SAVE SESSION ─────────────────────────────────────
 async function loginAndSave() {
   log('🔐 Starting fresh login...');
   if (!DUDA_EMAIL || !DUDA_PASSWORD) {
     throw new Error('DUDA_EMAIL and DUDA_PASSWORD must be set in GitHub Secrets');
   }
+
   const browser = await chromium.launch(getBrowserOptions());
   const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, userAgent: CHROME_UA });
   const page    = await context.newPage();
   await stealthify(page);
 
-  // FIX 1: always my.duda.co/login — white-labeled domain has no email form
+  // ✅ Always use my.duda.co/login — white-labeled domain has no email form
   const loginUrl = 'https://my.duda.co/login';
   log(`🔗 Navigating to login URL: ${loginUrl}`);
   await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
   try {
-    await page.waitForSelector('input[type="email"]', { timeout: 8000 });
+    await page.waitForSelector('input[type="email"]', { timeout: 30000 });
     await page.fill('input[type="email"]', DUDA_EMAIL);
     await page.fill('input[type="password"]', DUDA_PASSWORD);
     await page.locator('button[type="submit"]').filter({ hasNotText: 'Google' }).first().click();
@@ -259,7 +277,7 @@ async function loginAndSave() {
   }
 
   log('Waiting for login redirect...');
-  // FIX 2: undefined as second arg so { timeout: 180000 } is options not arg
+  // ✅ undefined as 2nd arg so { timeout: 180000 } is options, not arg
   await page.waitForFunction(
     () => window.location.href.includes('/home') && !window.location.href.includes('/login'),
     undefined,
@@ -268,17 +286,17 @@ async function loginAndSave() {
   log('✅ Login redirect detected');
 
   try {
-    // FIX 5: navigate to my.duda.co after login so cookies are captured for the right domain
     log(`🔗 Navigating to site post-login: ${DUDA_SITE_LINK}`);
     await page.goto(DUDA_SITE_LINK, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.waitForTimeout(2000);
   } catch (err) {
-    log(`⚠️ Warning: Navigation to site URL failed: ${err.message}`);
+    log(`⚠️ Navigation to site URL failed: ${err.message}`);
   }
 
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
 
+  // Prune auth file (best-effort)
   try {
     const rawState       = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
     const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
@@ -286,20 +304,13 @@ async function loginAndSave() {
     fs.writeFileSync(AUTH_FILE, JSON.stringify({ cookies: cleanCookies, origins: [] }, null, 2));
     log('🧹 Session file pruned successfully.');
   } catch (err) {
-    log(`⚠️ Warning: Failed to prune session file: ${err.message}`);
-  }
-
-  try {
-    const b64 = Buffer.from(fs.readFileSync(AUTH_FILE, 'utf8')).toString('base64');
-    fs.writeFileSync(path.resolve(__dirname, 'duda_auth_b64.txt'), b64);
-    log('✅ base64 session version saved to duda_auth_b64.txt');
-  } catch (err) {
-    log(`⚠️ Warning: Failed to save base64 version: ${err.message}`);
+    log(`⚠️ Failed to prune session file: ${err.message}`);
   }
 
   log('✅ Session saved to disk');
 }
 
+// ─── CHECK PAGE IS VALID ──────────────────────────────────────
 async function checkPageValid(page) {
   const currentUrl = page.url();
   const title      = await page.title();
@@ -312,7 +323,8 @@ async function checkPageValid(page) {
   return { valid: true };
 }
 
-// FIX 4: always login fresh — no isRetry, no session cache
+// ─── MAIN REPUBLISH ───────────────────────────────────────────
+// ✅ Always login fresh every run — no session cache, no isRetry
 async function republish() {
   log(`🚀 Starting republish`);
   log(`📋 Event ID: ${EVENT_ID || 'not provided'} | Org: ${ORG_NAME || 'not provided'}`);
@@ -336,7 +348,7 @@ async function republish() {
 
   try {
     log('Navigating to Duda dashboard...');
-    // FIX 5: use my.duda.co — cookies from login are valid for this domain
+    // ✅ use my.duda.co — cookies from login are valid here
     await page.goto(DUDA_SITE_LINK, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     await page.waitForTimeout(8000);
@@ -345,7 +357,6 @@ async function republish() {
     log('📸 Screenshot saved: duda_after_load.png');
 
     const { valid, reason } = await checkPageValid(page);
-    // FIX 4: no retry — throw directly if page invalid after fresh login
     if (!valid) {
       await browser.close();
       throw new Error(`Page invalid after fresh login: ${reason}. Check DUDA_EMAIL / DUDA_PASSWORD secrets.`);
@@ -374,7 +385,6 @@ async function republish() {
     log('📸 Screenshot saved: duda_after_publish.png');
 
     try {
-      // FIX 3 (also here): undefined as second arg so { timeout } is options not arg
       await page.waitForFunction(
         () => !document.querySelector('.Modal-module-shown-VYJnW-aps'),
         undefined,
@@ -401,6 +411,7 @@ async function republish() {
   }
 }
 
+// ─── RUN ─────────────────────────────────────────────────────
 republish().catch((err) => {
   log(`💥 Unhandled error: ${err.message}`);
   process.exit(1);
