@@ -485,7 +485,7 @@ async function republish() {
     await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // Give JS/React time to render the editor UI
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
 
     await page.screenshot({ path: 'duda_after_load.png', fullPage: true });
     log('📸 Screenshot saved: duda_after_load.png');
@@ -512,7 +512,7 @@ async function republish() {
     const publishBtn = page.locator(
       'button:has-text("Republish"), button:has-text("Publish"), [data-testid*="publish"]'
     ).first();
-    await publishBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await publishBtn.waitFor({ state: 'visible', timeout: 60000 });
 
     await page.screenshot({ path: 'duda_before_click.png', fullPage: true });
     log('📸 Screenshot saved: duda_before_click.png');
