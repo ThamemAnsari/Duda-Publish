@@ -35,7 +35,7 @@ const ZOHO_REFRESH_TOKEN = process.env.ZOHO_REFRESH_TOKEN || '';
 const AUTH_FILE      = path.resolve(__dirname, 'duda_auth.json');
 const CHROME_UA      = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 // ✅ Always use my.duda.co — login cookies are valid for this domain
-const DUDA_SITE_LINK = `https://my.duda.co/home/site/${DUDA_SITE}/home`;
+const DUDA_SITE_LINK = `https://infocc3969fa.dudasitebuilder.com/home/site/${DUDA_SITE}/home`;
 
 // ─── LOGGING ─────────────────────────────────────────────────
 function log(msg) {
@@ -262,22 +262,50 @@ async function loginAndSave() {
   const page    = await context.newPage();
   await stealthify(page);
 
-  // ✅ Always use my.duda.co/login — white-labeled domain has no email form
-  const loginUrl = 'https://my.duda.co/login';
+  // ✅ Correct login URL — the white-labeled domain
+  const loginUrl = 'https://infocc3969fa.dudasitebuilder.com/login';
   log(`🔗 Navigating to login URL: ${loginUrl}`);
-  await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
   try {
+    // ✅ 30s (not 8s) — the email field needs time to render on this domain
     await page.waitForSelector('input[type="email"]', { timeout: 30000 });
     await page.fill('input[type="email"]', DUDA_EMAIL);
     await page.fill('input[type="password"]', DUDA_PASSWORD);
-    await page.locator('button[type="submit"]').filter({ hasNotText: 'Google' }).first().click();
+
+    // Save login-page screenshot (uploaded as artifact if anything fails)
+    await page.screenshot({ path: 'duda_after_load.png', fullPage: true });
+
+    // Robust submit: try several button selectors, fall back to Enter key
+    const loginBtn = page.locator([
+      'button[type="submit"]',
+      'input[type="submit"]',
+      'button:has-text("Log In")',
+      'button:has-text("Log in")',
+      'button:has-text("Login")',
+      'button:has-text("Sign In")',
+      'button:has-text("Sign in")',
+    ].join(', ')).filter({ hasNotText: 'Google' }).first();
+
+    let clicked = false;
+    try {
+      await loginBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await loginBtn.click({ force: true, timeout: 10000 });
+      clicked = true;
+      log('✅ Login button clicked');
+    } catch (e) {
+      log(`⚠️ Login button not found (${e.message.split('\n')[0]}) — pressing Enter instead`);
+    }
+    if (!clicked) {
+      await page.focus('input[type="password"]');
+      await page.keyboard.press('Enter');
+      log('✅ Submitted login form via Enter key');
+    }
   } catch (err) {
     log(`⚠️ Login form interaction failed: ${err.message}`);
   }
 
   log('Waiting for login redirect...');
-  // ✅ undefined as 2nd arg so { timeout: 180000 } is options, not arg
   await page.waitForFunction(
     () => window.location.href.includes('/home') && !window.location.href.includes('/login'),
     undefined,
@@ -296,7 +324,6 @@ async function loginAndSave() {
   await context.storageState({ path: AUTH_FILE });
   await browser.close();
 
-  // Prune auth file (best-effort)
   try {
     const rawState       = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
     const essentialNames = ['JSESSIONID', 'AWSALB', 'AWSALBCORS'];
