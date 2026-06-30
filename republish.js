@@ -114,9 +114,9 @@ function buildCliqCard(success, errorMessage) {
   });
 
   const rows = [
-    { Field: 'Event ID',                Value: EVENT_ID || 'N/A' },   // ← always show
+    { Field: 'Event ID',                Value: EVENT_ID || 'N/A' },
     { Field: 'Organization Name',       Value: ORG_NAME || 'N/A' },
-    { Field: 'Website Published Status',        Value: success ? '✅ Published' : '❌ Failed' },
+    { Field: 'Website Published Status', Value: success ? '✅ Published' : '❌ Failed' },
     { Field: 'Published Date and Time', Value: timestamp },
   ];
 
@@ -285,7 +285,6 @@ async function stealthify(page) {
 async function dismissModal(page) {
   await page.waitForTimeout(2000);
 
-  // ── Strategy 1: Click the × button inside #whats-newWrapper via evaluate ──
   try {
     const closed = await page.evaluate(() => {
       const wrapper = document.getElementById('whats-newWrapper');
@@ -321,7 +320,6 @@ async function dismissModal(page) {
     log(`⚠️  Strategy 1 failed: ${e.message}`);
   }
 
-  // ── Strategy 2: Click the overlay itself to dismiss ──
   try {
     const overlay = page.locator('#whats-newWrapper .Modal-module-overlay-2OdDP-aps').first();
     if (await overlay.isVisible({ timeout: 2000 })) {
@@ -332,7 +330,6 @@ async function dismissModal(page) {
     }
   } catch (_) {}
 
-  // ── Strategy 3: Press Escape ──
   await page.keyboard.press('Escape');
   log('ℹ️  Sent Escape to dismiss any open modal');
   await page.waitForTimeout(500);
@@ -342,6 +339,7 @@ async function dismissModal(page) {
 async function waitForModalToClear(page) {
   log('Waiting for modal overlay to clear...');
   try {
+    // ✅ CHANGE 3: added undefined as second arg so { timeout } is options not arg
     await page.waitForFunction(
       () => {
         const wrapper = document.getElementById('whats-newWrapper');
@@ -349,6 +347,7 @@ async function waitForModalToClear(page) {
         const overlay = wrapper.querySelector('.Modal-module-shown-VYJnW-aps');
         return !overlay;
       },
+      undefined,
       { timeout: 10000 }
     );
     log('✅ Modal overlay cleared');
@@ -373,13 +372,8 @@ async function loginAndSave() {
   const page = await context.newPage();
   await stealthify(page);
 
-  let loginUrl = 'https://my.duda.co/login';
-  try {
-    const urlObj = new URL(SITE_URL);
-    loginUrl = `${urlObj.origin}/login`;
-  } catch (err) {
-    log(`⚠️ Failed to parse SITE_URL: ${err.message}, defaulting to ${loginUrl}`);
-  }
+  // ✅ CHANGE 1: always use my.duda.co/login — white-labeled domain has no email form
+  const loginUrl = 'https://my.duda.co/login';
 
   log(`🔗 Navigating to login URL: ${loginUrl}`);
   await page.goto(loginUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -397,8 +391,10 @@ async function loginAndSave() {
   }
 
   log('Waiting for login redirect...');
+  // ✅ CHANGE 2: added undefined as second arg so { timeout } is options not arg
   await page.waitForFunction(
     () => window.location.href.includes('/home') && !window.location.href.includes('/login'),
+    undefined,
     { timeout: 180000 }
   );
   log('✅ Login redirect detected');
@@ -462,15 +458,13 @@ async function checkPageValid(page) {
 }
 
 // ─── MAIN REPUBLISH ───────────────────────────────────────────
-async function republish(isRetry = false) {
-  log(`🚀 Starting republish for: ${SITE_URL}${isRetry ? ' (retry after re-login)' : ''}`);
+// ✅ CHANGE 4: always login fresh every run — no session cache, no isRetry
+async function republish() {
+  log(`🚀 Starting republish for: ${SITE_URL}`);
   log(`📋 Event ID: ${EVENT_ID || 'not provided'} | Org: ${ORG_NAME || 'not provided'}`);
 
-  const hasSession = loadSession();
-  if (!hasSession) {
-    log('No session found — logging in fresh...');
-    await loginAndSave();
-  }
+  log('Logging in fresh...');
+  await loginAndSave();
 
   const browser = await chromium.launch(getBrowserOptions());
   const context = await browser.newContext({
@@ -498,18 +492,11 @@ async function republish(isRetry = false) {
 
     // ── Validate page (403, login redirect, blank) ──
     const { valid, reason } = await checkPageValid(page);
+    // ✅ CHANGE 4 (cont): simplified — no retry, throw directly if still invalid
     if (!valid) {
       log(`⚠️  Page invalid: ${reason}`);
       await browser.close();
-
-      if (!isRetry) {
-        log('🔄 Session expired or rejected — re-logging in and retrying once...');
-        if (fs.existsSync(AUTH_FILE)) fs.unlinkSync(AUTH_FILE);
-        await loginAndSave();
-        return await republish(true);
-      } else {
-        throw new Error(`Page still invalid after re-login: ${reason}. Check DUDA_EMAIL / DUDA_PASSWORD secrets.`);
-      }
+      throw new Error(`Page invalid after fresh login: ${reason}. Check DUDA_EMAIL / DUDA_PASSWORD secrets.`);
     }
 
     // ── Dismiss the "What's New at Duda" modal ──
@@ -541,8 +528,10 @@ async function republish(isRetry = false) {
 
     // ── Wait for publish dialog to disappear (confirms completion) ──
     try {
+      // ✅ CHANGE 4 (cont): added undefined as second arg so { timeout } is options not arg
       await page.waitForFunction(
         () => !document.querySelector('.Modal-module-shown-VYJnW-aps'),
+        undefined,
         { timeout: 60000 }
       );
       log('✅ Publish dialog closed — republish confirmed complete!');
