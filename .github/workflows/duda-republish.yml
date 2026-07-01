@@ -51,7 +51,25 @@ jobs:
           sleep 2
           echo "✅ Xvfb started on display :99"
 
-      # 6. Run republish script
+      # 6. Verify the checked-out script matches what we expect —
+      #    proves there's no stale checkout/cache issue before we
+      #    burn the 10-minute job timeout on a doomed run.
+      - name: Verify script version
+        run: |
+          echo "Commit SHA: $(git rev-parse HEAD)"
+          echo "Branch/ref: ${{ github.ref }}"
+          echo "republish.js sha256: $(sha256sum republish.js | cut -d' ' -f1)"
+          echo ""
+          echo "--- SCRIPT_VERSION line ---"
+          grep -n "SCRIPT_VERSION" republish.js || echo "⚠️ SCRIPT_VERSION not found — old file deployed!"
+          echo ""
+          echo "--- LOGIN_URL / loginUrl line(s) ---"
+          grep -n -i "login_url\|loginurl" republish.js
+          echo ""
+          echo "--- domain guard present? ---"
+          grep -n "my.duda.co" republish.js | head -5
+
+      # 7. Run republish script
       - name: Run Duda Republish
         env:
           DISPLAY:               :99
@@ -73,7 +91,7 @@ jobs:
           DUDA_SITE_URL:         ${{ github.event.client_payload.site_url || github.event.inputs.site_url || '' }}
         run: node republish.js
 
-      # 7. Upload screenshots — always, even on failure
+      # 8. Upload screenshots — always, even on failure
       #    View them in: Actions tab → click the run → Artifacts section
       - name: Upload screenshots
         if: always()
