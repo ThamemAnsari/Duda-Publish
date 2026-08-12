@@ -255,7 +255,7 @@ async function loginAndSave() {
   // instead of burning 30s waiting for a form that will never appear.
   const landedUrl = page.url();
   log(`📍 Landed on: ${landedUrl}`);
-  if (!landedUrl.includes('my.duda.co')) {
+  if (!landedUrl.includes('my.duda.co') && !landedUrl.includes('www.duda.co')) {
     throw new Error(`Redirected away from my.duda.co to "${landedUrl}" — white-labeled domain has no email/password form. Check DUDA_SITE / account config.`);
   }
 
